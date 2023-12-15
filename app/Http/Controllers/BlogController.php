@@ -46,10 +46,12 @@ class BlogController extends Controller
     //Get The Latest Blog Which are Approved By Super-admin
     public function blog(Request $request, Blog $blog){
         try{
-            if($request->search !== ""){
-                $blog = Blog::where('status',1)
-                ->where('title','LIKE',"%$request->search%")
-                ->get();
+            $title =$request->input('title');
+            
+            if($title){
+                $blog = Blog::where('title','LIKE',"%$title%")
+                ->where('status',1)
+                ->paginate(10);
             }
             else{
                 $blog = Blog::where('status',1)->latest()->paginate(10);

@@ -15,7 +15,13 @@ class PublisherController extends Controller
     public function myBlog(Request $request, Blog $blog){
         try{
             $user = auth()->user();
-            $blog = $user->blogs()->paginate(10);
+            $title =$request->input('title');
+            if($title){
+                $blog = $user->blogs()->where('title','LIKE',"$title")->paginate(10);
+            }
+            else{
+                $blog = $user->blogs()->paginate(10);
+            }
 
             return response()->json([
                 'totalblog'=>$blog->count(),

@@ -15,11 +15,12 @@ class SuperadminController extends Controller
     public function userList(Request $request, User $user)
     {
         try {
-            if($request->search !== ""){
-                $user = User::where('name','LIKE',"%$request->search%")
-                ->orWhere('email','LIKE',"%$request->search%")
-                ->get();
-            }else{
+            $name =$request->input('name');
+
+            if($name){
+                $user = User::where('name','LIKE',"%$name%")->paginate(10);
+            }
+            else{
                 $user = User::latest()->paginate(10);
             }
             
@@ -42,11 +43,13 @@ class SuperadminController extends Controller
     }
 
     //Get All Blog's Data
-    public function blogList(Request $request, Blog $blog)
+    public function blogList(Request $request ,Blog $blog)
     {
         try {
-            if($request->search !== ""){
-                $blog = Blog::where('title','LIKE',"%$request->search%")->get();
+            $title =$request->input('title');
+
+            if($title){
+                $blog = Blog::where('title','LIKE',"%$title%")->paginate(10);
             }
             else{
                 $blog = Blog::latest()->paginate(10);    
@@ -71,21 +74,23 @@ class SuperadminController extends Controller
     }
 
     //Get All Publisher's Data
-    public function publisherList(Request $request, User $publisherList)
+    public function publisherList(Request $request, User $publisher)
     {
         try {
-            if($request->search !== ""){
-                $publisher = User::where("role",1)
-                ->where('name','LIKE',"%$request->search%")
-                ->get();
+            $name =$request->input('name');
+
+            if($name){
+                $publisher = User::where('name','LIKE',"%$name%")
+                ->where("role",1)
+                ->paginate(10);
             }else{
                 $publisher = User::where("role", 1)->paginate(10);
             }
 
             return response()->json(
                 [
-                    "totalpub" => $publisher->count(),
-                    "pub" => $publisher,
+                    "totalpublisher" => $publisher->count(),
+                    "publisher" => $publisher,
                 ],
                 200
             );
