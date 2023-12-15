@@ -31,7 +31,7 @@ use App\Http\Middleware\UserManage;
 
 Route::post('/signup', [AuthController::class, 'store']);
 Route::post('/login',[AuthController::class,'login']);
-Route::post('/blog',[BlogController::class,'blog']);
+Route::get('/blog',[BlogController::class,'blog']);
 Route::get('/blogdetail/{blog}',[BlogController::class,'blogData']);
 Route::post('/forgetpassword',[AuthController::class,'forgetPassword']);
 Route::post('/reset-password/{token}',[AuthController::class,'resetPassword']);
@@ -39,9 +39,9 @@ Route::post('/reset-password/{token}',[AuthController::class,'resetPassword']);
 //super-admin Routes
 Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admin')->group(function () {    
     Route::get('/show',[AuthController::class,'profileshow']);
-    Route::post('/userlist',[SuperadminController::class,'userList']);
-    Route::post('/bloglist',[SuperadminController::class,'blogList']);
-    Route::post('/publisherlist',[SuperadminController::class,'publisherList']);
+    Route::get('/userlist/{name?}',[SuperadminController::class,'userList']);
+    Route::get('/bloglist/{title?}',[SuperadminController::class,'blogList']);
+    Route::get('/publisherlist/{name?}',[SuperadminController::class,'publisherList']);
     Route::get('/blog/request',[SuperadminController::class,'blogRequestList']);
     Route::post('/blog/approval/{blog}',[SuperadminController::class,'blogApproval']);
     Route::get('/publisher/request',[SuperadminController::class,'publisherRequestList']);
@@ -67,7 +67,7 @@ Route::middleware(['auth:api','IsPublisher','UserManage'])->prefix('/publisher')
     Route::get('/show',[AuthController::class,'profileshow']);
     Route::post('/createblog',[BlogController::class,'createBlog']);
     Route::post('/editblog/{blog}',[BlogController::class,'editBlog']);
-    Route::get('/myblog',[PublisherController::class,'myBlog']);
+    Route::get('/myblog/{title?}',[PublisherController::class,'myBlog']);
     Route::delete('/blogdelete/{blog}',[BlogController::class,'blogDelete']);
     Route::post('/addlike/{blog}',[BlogController::class,'addLike']);
     Route::post('/addcomment/{blog}',[BlogController::class,'addComment']);
