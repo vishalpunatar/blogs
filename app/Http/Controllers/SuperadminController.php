@@ -16,9 +16,13 @@ class SuperadminController extends Controller
     {
         try {
             $name =$request->input('name');
+            $email = $request->input('email');
 
             if($name){
                 $user = User::where('name','LIKE',"%$name%")->paginate(10);
+            }
+            elseif($email){
+                $user = User::where('email','LIKE',"%$email%")->paginate(10);
             }
             else{
                 $user = User::latest()->paginate(10);
@@ -77,13 +81,19 @@ class SuperadminController extends Controller
     public function publisherList(Request $request)
     {
         try {
-            $name =$request->input('name');
-
+            $name = $request->input('name');
+            $email = $request->input('name');
             if($name){
                 $publisher = User::where('name','LIKE',"%$name%")
                 ->where("role",1)
                 ->paginate(10);
-            }else{
+            }
+            elseif($email){
+                $publisher = User::where('email','LIKE',"$email")
+                ->where("role",1)
+                ->paginate(10);
+            }
+            else{
                 $publisher = User::where("role", 1)->paginate(10);
             }
 
@@ -271,22 +281,25 @@ class SuperadminController extends Controller
     //Edit User by Super-admin
     public function editUser(Request $request, User $user)
     {
-        $user = User::findOrFail($user->id);
-
         $request->validate([
             "name" => "required",
-            "email" => "required|email",
             "role" => "required",
             "status" => "required",
         ]);
 
         try {
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = bcrypt($user->password);
-            $user->role = $request->role;
-            $user->status = $request->status;
-            $user->save();
+            $user->update([
+                'name'=>$request->name,
+                'role'=>$request->role,
+                'status'=>$request->status,
+            ]);
+            
+            // $user->name = $request->name;
+            // $user->email = $user->email;
+            // $user->password = bcrypt($user->password);
+            // $user->role = $request->role;
+            // $user->status = $request->status;
+            // $user->save();
 
             return response()->json(
                 [
@@ -334,10 +347,9 @@ class SuperadminController extends Controller
     //Edit Blog by Super-admin
     public function editBlog(Request $request, Blog $blog)
     {   
-        $blog = Blog::findOrFail($blog->id);
         //$blog = $this->fetchBlogForEdit($blog);
         $request->validate([
-            "title" => "required",
+            "title" => "required|unique|string",
             "content" => "required",
             "image" => "required|image",
             "status" => "required",
@@ -373,11 +385,9 @@ class SuperadminController extends Controller
 
     //Super-admin Can Manage User's Role & Status
     public function manageUser(Request $request, User $user){
-        $user = User::findOrFail($user->id);
-        
         $request->validate([
-            'role'=>'required',
-            'status'=>'required',
+            "role"=>"required",
+            "status"=>"required",
         ]);
 
         try {

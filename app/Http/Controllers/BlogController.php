@@ -15,7 +15,7 @@ class BlogController extends Controller
     //Create Blog By Publisher
     public function createBlog(Request $request){
         $request->validate([
-            'title' => 'required',
+            'title' => 'required|string|unique',
             'content' => 'required',
             'image' => 'required|image',
         ]);
@@ -71,22 +71,16 @@ class BlogController extends Controller
     //Get Perticular Blog-Data
     public function blogData(Blog $blog){
         try{
-            $blog = Blog::where('id',$blog->id)->where('status',1)->first();
-            if(!$blog){
-                return response()->json([
-                    "message"=>"Record Not Found!",
-                ],404);
-            }
-            $totalcomments = $blog->comments()->get();
+            $totalcomments = $blog->comments;
             $comments = $totalcomments->whereNull('parent_id');
-            $likes = $blog->likes()->get();
+            $likes = $blog->likes;
             $reply = $totalcomments->whereNotNull('parent_id'); 
 
 
             return response()->json([
                 'message'=>'Blog Details',
                 'blog'=>$blog,
-                'totalcomments'=>$totalcomments->count(),
+                'totalcomments'=>$comments->count(),
                 'comments'=>$comments,
                 'totalreply'=>$reply->count(),
                 'reply'=>$reply,
@@ -163,7 +157,6 @@ class BlogController extends Controller
                 'comment'=>'required',
             ]);
             
-            $blog = Blog::findOrFail($blog->id);
             $comment = $blog->comments()->create([
                 'user_id' => auth()->id(),
                 'comment' => $request->comment,
@@ -187,7 +180,7 @@ class BlogController extends Controller
             'comment' => 'required',
         ]);
 
-        $comment = Comment::where('id',$comment->id)->first();
+        //$comment = Comment::where('id',$comment->id)->first();
 
         $reply = $comment->create([
             'user_id' => auth()->id(),
@@ -205,24 +198,20 @@ class BlogController extends Controller
     //Add Like To Particular Blog   
     public function addLike(Blog $blog){
         try{
-            $blog = Blog::findOrFail($blog->id);
-            $user = auth()->user();
-            
-            if($blog->likes->where('user_id',$user->id)->first()){    
+            if($blog->likes->where('user_id',auth()->id())->first()){    
                 return response()->json([
                     'message'=>'Already Liked.',
                 ],500);    
             }
             else{
                 $like = $blog->likes()->create([
-                    'user_id' => $user->id,
+                    'user_id' => auth()->id(),
                     'like' => 1,
                 ]);    
             }
            
             return response()->json([
                 'message'=>'Like Added.',
-                'like'=>$like,
             ],200);
         }catch(\Exception $e){
             report($e);
@@ -236,7 +225,7 @@ class BlogController extends Controller
     public function showComment(Blog $blog){
         try{
             //it return's Comments including Comment Replies of Perticular Blog 
-            $totalcomments = Blog::findOrFail($blog->id)->comments()->get();  
+            $totalcomments = $blog->comments;  
             $totalcomments->flatMap->replies;
 
             //it  return's Only Comments of Perticular Blog
@@ -257,7 +246,6 @@ class BlogController extends Controller
     //Super-admin and Publisher Can View Blog Replies
     public function showReply(Blog $blog){
         try {
-            $blog = Blog::findOrFail($blog->id);
             $reply = $blog->comments->whereNotNull('parent_id');
                 
             return response()->json([
@@ -275,7 +263,7 @@ class BlogController extends Controller
     //Super-admin and Publisher Can View Blog Like's
     public function showLike(Blog $blog){
         try{
-            $like = Blog::findOrFail($blog->id)->likes()->get();
+            $like = $blog->likes;
             
             return response()->json([
                 'totallikes'=>$like->count(),

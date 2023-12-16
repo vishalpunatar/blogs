@@ -20,15 +20,14 @@ class UserController extends Controller
     public function edit(Request $request) {
         $request->validate([
             "name" => "required|string",
-            "email" => "required|email|unique:users,email",
         ]);
         
         try {
-            $user = auth()->user();
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = $user->password;
-            $user->save();
+            $user = auth()->user()->update(['name'=>$request->name]);
+            //$user->name = $request->name;
+            // $user->email = $user->email;
+            // $user->password = $user->password;
+            // $user->save();
 
             return response()->json([
                 "message"=>"Data Updated Successfully.",
@@ -71,7 +70,6 @@ class UserController extends Controller
             
             return response()->json([
                 'message'=>'Request Sended.',
-                'publisher'=>$publisher,
             ],200);
         }catch(\Exception $e){
             report($e);

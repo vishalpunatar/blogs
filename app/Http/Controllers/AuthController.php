@@ -27,19 +27,11 @@ class AuthController extends Controller
         ]);
 
         try{
-            $user = User::where('email',$request->email)->first();
-            
-            if($user){
-                return response()->json([
-                    'message'=>'Email Already Registerd!',
-                ],500);
-            }else{
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => bcrypt($request->password),
-                ]);    
-            }
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);    
             
             $token = $user->createToken('userToken')->accessToken;
             
@@ -73,7 +65,7 @@ class AuthController extends Controller
                 ],200);
             }else{
                 return response()->json([
-                    'message'=>'Enter valid Details!',
+                    'message'=>'Incorrect Email or Password!',
                 ],401);
             }
         }catch(\Exception $e){
@@ -154,7 +146,6 @@ class AuthController extends Controller
             
                 return response()->json([
                     'message'=>'Mail Sended Successfully.',
-                    'token'=>$token,
                 ],200);  
             }
         } catch (\Exception $e) {
