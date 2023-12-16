@@ -17,5 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-App\Http\Controllers\TestController.php
-App\Models\PublisherReq.php
+\App\Http\Controllers\TestController.php
+\App\Models\PublisherReq.php
