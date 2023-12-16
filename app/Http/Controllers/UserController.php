@@ -43,7 +43,7 @@ class UserController extends Controller
     }
 
     //User Send Request To Become Publisher
-    public function publisherRequest(Request $request, PublisherRequest $publisher){
+    public function publisherRequest(Request $request){
         $request->validate([
             'description'=>'required',
         ]);
@@ -67,7 +67,7 @@ class UserController extends Controller
             ]);
 
             //Send Mail to admin's email that User Request to wants to be a Publisher 
-            Mail::to($admin->email)->send(new SendRequestMail($publisher,$token,$user));
+            Mail::to($admin->email)->send(new SendRequestMail($publisher,$token));
             
             return response()->json([
                 'message'=>'Request Sended.',

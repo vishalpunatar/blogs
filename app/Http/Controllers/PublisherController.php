@@ -12,7 +12,7 @@ use App\Models\User;
 class PublisherController extends Controller
 {
     //Publisher Can Get His Blog's
-    public function myBlog(Request $request, Blog $blog){
+    public function myBlog(Request $request){
         try{
             $user = auth()->user();
             $title =$request->input('title');

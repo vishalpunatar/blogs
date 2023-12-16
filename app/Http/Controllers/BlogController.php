@@ -24,13 +24,13 @@ class BlogController extends Controller
             $img = time().".".$request->image->extension();
             $request->image->storeAs('/public/image',$img);
             
-            $blog = new Blog;
-            $blog->user_id = Auth()->id();
-            $blog->title = $request->title;
-            $blog->content = $request->content;
-            $blog->image = $img;
-            $blog->save();
-
+            $blog = Blog::create([
+                'user_id' => Auth()->id(),
+                'title' => $request->title,
+                'content' => $request->content,
+                'image' => $img,    
+            ]);
+            
             return response()->json([
                 'message'=>'Blog Added Successfully.',
                 'blog'=>$blog,
@@ -44,7 +44,7 @@ class BlogController extends Controller
     }
 
     //Get The Latest Blog Which are Approved By Super-admin
-    public function blog(Request $request, Blog $blog){
+    public function blog(Request $request){
         try{
             $title =$request->input('title');
             
@@ -116,7 +116,7 @@ class BlogController extends Controller
             if(!$blog) {
                 return response()->json([
                     "message"=>"You don't have authorization to Edit this Blog!",
-                ],404);
+                ],401);
             }
 
             $img = time().".".$request->image->extension();
@@ -164,13 +164,11 @@ class BlogController extends Controller
             ]);
             
             $blog = Blog::findOrFail($blog->id);
+            $comment = $blog->comments()->create([
+                'user_id' => auth()->id(),
+                'comment' => $request->comment,
+            ]);
             
-            $comment = new Comment;
-            $comment->user_id = auth()->id();
-            $comment->blog_id = $blog->id;
-            $comment->comment = $request->comment;
-            $comment->save();
-    
             return response()->json([
                 'message'=>'Comment Added.',
                 'comment'=>$comment,
@@ -191,12 +189,12 @@ class BlogController extends Controller
 
         $comment = Comment::where('id',$comment->id)->first();
 
-        $reply = new Comment;
-        $reply->user_id = auth()->id();
-        $reply->blog_id = $comment->blog_id;
-        $reply->parent_id = $comment->id;
-        $reply->comment = $request->comment;  
-        $reply->save();
+        $reply = $comment->create([
+            'user_id' => auth()->id(),
+            'blog_id' => $comment->blog_id,
+            'parent_id' => $comment->id,
+            'comment' => $request->comment,
+        ]);
 
         return response()->json([
             'message'=>'Reply Added.',
@@ -218,7 +216,6 @@ class BlogController extends Controller
             else{
                 $like = $blog->likes()->create([
                     'user_id' => $user->id,
-                    'blog_id' => $blog->id,
                     'like' => 1,
                 ]);    
             }
@@ -238,9 +235,12 @@ class BlogController extends Controller
     //Super-admin and Publisher Can View Blog Comment's 
     public function showComment(Blog $blog){
         try{
-            $totalcomments = Blog::findOrFail($blog->id)->comments()->get();
-            $comments = $totalcomments->whereNull('parent_id');  
+            //it return's Comments including Comment Replies of Perticular Blog 
+            $totalcomments = Blog::findOrFail($blog->id)->comments()->get();  
             $totalcomments->flatMap->replies;
+
+            //it  return's Only Comments of Perticular Blog
+            $comments = $totalcomments->whereNull('parent_id');
 
             return response()->json([
                 'totalcomment'=>$totalcomments->count(),

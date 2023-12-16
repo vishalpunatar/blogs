@@ -12,7 +12,7 @@ use Mail;
 class SuperadminController extends Controller
 {
     //Get All User's Data
-    public function userList(Request $request, User $user)
+    public function userList(Request $request)
     {
         try {
             $name =$request->input('name');
@@ -43,7 +43,7 @@ class SuperadminController extends Controller
     }
 
     //Get All Blog's Data
-    public function blogList(Request $request ,Blog $blog)
+    public function blogList(Request $request)
     {
         try {
             $title =$request->input('title');
@@ -74,7 +74,7 @@ class SuperadminController extends Controller
     }
 
     //Get All Publisher's Data
-    public function publisherList(Request $request, User $publisher)
+    public function publisherList(Request $request)
     {
         try {
             $name =$request->input('name');
@@ -106,7 +106,7 @@ class SuperadminController extends Controller
     }
 
     //Get All Blog's Request
-    public function blogRequestList(Blog $blog)
+    public function blogRequestList()
     {
         try {
             $blog = Blog::where("status", 0)->latest()->paginate(10);
@@ -159,15 +159,15 @@ class SuperadminController extends Controller
     }
 
     //Get All User's Request Who Wants To Become Publisher
-    public function publisherRequestList(PublisherRequest $request)
+    public function publisherRequestList()
     {
         try {
-            $request = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
+            $publisherRequest = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
             
             return response()->json(
                 [
-                    "totalrequest" => $request->count(),
-                    "req" => $request,
+                    "totalrequest" => $publisherRequest->count(),
+                    "req" => $publisherRequest,
                 ],
                 200
             );
@@ -183,7 +183,7 @@ class SuperadminController extends Controller
     }
 
     //Super-admin Approved User's Pending Request
-    public function publisherApproval(Request $request, PublisherRequest $publisher)
+    public function publisherApproval(Request $request)
     {
         $request->validate([
             'token'=>'required',

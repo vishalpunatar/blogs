@@ -45,7 +45,7 @@ Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admi
     Route::get('/blog/request',[SuperadminController::class,'blogRequestList']);
     Route::post('/blog/approval/{blog}',[SuperadminController::class,'blogApproval']);
     Route::get('/publisher/request',[SuperadminController::class,'publisherRequestList']);
-    Route::post('/publisher/approval/id/{id}/token/{token}',[SuperadminController::class,'publisherApproval']);
+    Route::post('/publisher/approval/user_id/{user_id}/token/{token}',[SuperadminController::class,'publisherApproval']);
     Route::post('/edituser/{user}',[SuperadminController::class,'editUser']);
     Route::post('/editblog/{blog}',[SuperadminController::class,'editBlog']);
     Route::delete('/userdelete/{user}',[SuperadminController::class,'userDelete']);

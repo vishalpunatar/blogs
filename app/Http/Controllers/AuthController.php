@@ -19,20 +19,28 @@ use Exception;
 class AuthController extends Controller
 {
     //To Store User data
-    public function store(Request $request, User $user){
+    public function store(Request $request){
         $request->validate([
             'name' => 'required',
-            'email' => 'required|unique:users|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed'
         ]);
 
         try{
-            $user = new User;
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = bcrypt($request->password);
-            $user->save();
-
+            $user = User::where('email',$request->email)->first();
+            
+            if($user){
+                return response()->json([
+                    'message'=>'Email Already Registerd!',
+                ],500);
+            }else{
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => bcrypt($request->password),
+                ]);    
+            }
+            
             $token = $user->createToken('userToken')->accessToken;
             
             return response()->json([
@@ -79,16 +87,20 @@ class AuthController extends Controller
     //Get Authenticate User Profile
     public function profileshow() {
         try {
-            return $user = auth()->user();
-            return response()->json(['user'=>$user],200);
+            $user = auth()->user();
+            return response()->json([
+                'user'=>$user,
+            ],200);
         } catch(Exeception $e) {
             report($e);
-            return response()->json(['message'=> "Something went wrong."],500);
+            return response()->json([
+                'message'=> 'Something went wrong!',
+            ],500);
         }
     }
 
     //To Change User Existing Password
-    public function changePassword(Request $request, User $user){
+    public function changePassword(Request $request){
         $request->validate([
             'oldpassword'=>'required',
             'password'=>'required|min:8|confirmed',
@@ -121,37 +133,36 @@ class AuthController extends Controller
             'email'=>'required|email|exists:users,email',
         ]);
 
-       try {
-        $email = User::where('email',$request->email)->first();
-            
-        if(!$email){
-            return response()->json([
-                'message'=>'Not Found!',
-            ],404);
-        }
-        else{
-            $token = Str::random(32);
+        try {
+            $email = User::where('email',$request->email)->first();
+            $token = Str::random(32);    
 
-            $data = new ResetPassword;
-            $data->email = $request->email;
-            $data->token = $token;
-            $data->created_at = Carbon::now();
-            $data->save();  
+            if(!$email){
+                return response()->json([
+                    'message'=>'Email Not Found!',
+                ],404);
+            }
+            else{
+                $data = ResetPassword::create([
+                    'email' => $request->email,
+                    'token' => $token,
+                    'created_at' => Carbon::now(),
+                ]);
 
-            Mail::to($request->email)->send(new ResetPasswordMail($token));
-    
-            return response()->json([
-                'message'=>'Mail Sended Successfully.',
-                'token'=>$token,
-            ],200);  
-        }
-       } catch (\Exception $e) {
-            report($e);
-            return response()->json([
-                'message'=>'Something Went Wrong!',
-            ],500);
-       }
+                //Send mail on User's Requested Email if Email Exists 
+                Mail::to($request->email)->send(new ResetPasswordMail($token));
             
+                return response()->json([
+                    'message'=>'Mail Sended Successfully.',
+                    'token'=>$token,
+                ],200);  
+            }
+        } catch (\Exception $e) {
+             report($e);
+             return response()->json([
+                 'message'=>'Something Went Wrong!',
+             ],500);
+        }
     }
     
     //To Reset Password via Email
