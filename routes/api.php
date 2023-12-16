@@ -39,9 +39,9 @@ Route::post('/reset-password/{token}',[AuthController::class,'resetPassword']);
 //super-admin Routes
 Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admin')->group(function () {    
     Route::get('/show',[AuthController::class,'profileshow']);
-    Route::get('/userlist/{name?}',[SuperadminController::class,'userList']);
+    Route::get('/userlist/{name?}/{email?}',[SuperadminController::class,'userList']);
     Route::get('/bloglist/{title?}',[SuperadminController::class,'blogList']);
-    Route::get('/publisherlist/{name?}',[SuperadminController::class,'publisherList']);
+    Route::get('/publisherlist/{name?}/{email?}',[SuperadminController::class,'publisherList']);
     Route::get('/blog/request',[SuperadminController::class,'blogRequestList']);
     Route::post('/blog/approval/{blog}',[SuperadminController::class,'blogApproval']);
     Route::get('/publisher/request',[SuperadminController::class,'publisherRequestList']);
