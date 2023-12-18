@@ -6,14 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use App\Models\User;
 use App\Models\ResetPassword;
+use App\Models\User;
 use App\Mail\ResetPasswordMail;
 use Mail;
-
 use Exception;
 
 class AuthController extends Controller

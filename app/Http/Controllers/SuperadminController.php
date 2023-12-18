@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Blog;
 use App\Models\PublisherRequest;
 use App\Mail\RequestAcceptedMail;
+use Exception;
 use Mail;
 
 class SuperadminController extends Controller
@@ -114,7 +115,6 @@ class SuperadminController extends Controller
     //Super-admin Approved Blog's Pending Request
     public function blogApproval(Blog $blog){
         try {
-            // $blog = Blog::findOrFail($blog->id);
             if($blog->status == 1){
                 return response()->json([
                     "message"=>"Already Approved!",

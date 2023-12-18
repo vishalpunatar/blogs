@@ -149,11 +149,11 @@ class BlogController extends Controller
 
     //User Add Comment To Blog
     public function addComment(Request $request, Blog $blog){
+        $request->validate([
+            'comment'=>'required',
+        ]);
+
         try{
-            $request->validate([
-                'comment'=>'required',
-            ]);
-            
             $comment = $blog->comments()->create([
                 'user_id' => auth()->id(),
                 'comment' => $request->comment,
@@ -176,18 +176,25 @@ class BlogController extends Controller
         $request->validate([
             'comment' => 'required',
         ]);
-
-        $reply = $comment->create([
-            'user_id' => auth()->id(),
-            'blog_id' => $comment->blog_id,
-            'parent_id' => $comment->id,
-            'comment' => $request->comment,
-        ]);
-
-        return response()->json([
-            'message'=>'Reply Added.',
-            'reply'=>$reply,
-        ],200);
+        
+        try {
+            $reply = $comment->create([
+                'user_id' => auth()->id(),
+                'blog_id' => $comment->blog_id,
+                'parent_id' => $comment->id,
+                'comment' => $request->comment,
+            ]);
+    
+            return response()->json([
+                'message'=>'Reply Added.',
+                'reply'=>$reply,
+            ],200);   
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "message" => "Something Went Wrong!",
+            ],500);
+        }
     }
 
     //Add Like To Particular Blog   
