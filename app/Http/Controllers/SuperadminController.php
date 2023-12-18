@@ -13,8 +13,7 @@ use Mail;
 class SuperadminController extends Controller
 {
     //Get All User's Data
-    public function userList(Request $request)
-    {
+    public function userList(Request $request){
         try {
             $name =$request->input('name');
             $email = $request->input('email');
@@ -29,27 +28,20 @@ class SuperadminController extends Controller
                 $user = User::latest()->paginate(10);
             }
             
-            return response()->json(
-                [
-                    "totaluser" => $user->count(),
-                    "user" => $user,
-                ],
-                200
-            );
+            return response()->json([
+                "totaluser" => $user->count(),
+                "user" => $user,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "No Data Found.",
-                ],
-                404
-            );
+            return response()->json([
+                "message" => "No Data Found.",
+            ],404);
         }
     }
 
     //Get All Blog's Data
-    public function blogList(Request $request)
-    {
+    public function blogList(Request $request){
         try {
             $title =$request->input('title');
 
@@ -60,27 +52,20 @@ class SuperadminController extends Controller
                 $blog = Blog::latest()->paginate(10);    
             }
             
-            return response()->json(
-                [
-                    "totalblog" => $blog->count(),
-                    "blog" => $blog,
-                ],
-                200
-            );
+            return response()->json([
+                "totalblog" => $blog->count(),
+                "blog" => $blog,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "No Data Found.",
-                ],
-                404
-            );
+            return response()->json([
+                "message" => "No Data Found.",
+            ],404);
         }
     }
 
     //Get All Publisher's Data
-    public function publisherList(Request $request)
-    {
+    public function publisherList(Request $request){
         try {
             $name = $request->input('name');
             $email = $request->input('name');
@@ -98,50 +83,36 @@ class SuperadminController extends Controller
                 $publisher = User::where("role", 1)->paginate(10);
             }
 
-            return response()->json(
-                [
-                    "totalpublisher" => $publisher->count(),
-                    "publisher" => $publisher,
-                ],
-                200
-            );
+            return response()->json([
+                "totalpublisher" => $publisher->count(),
+                "publisher" => $publisher,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "No Data Found.",
-                ],
-                404
-            );
+            return response()->json([
+                "message" => "No Data Found.",
+            ],404);
         }
     }
 
     //Get All Blog's Request
-    public function blogRequestList()
-    {
+    public function blogRequestList(){
         try {
             $blog = Blog::where("status", 0)->latest()->paginate(10);
-            return response()->json(
-                [
-                    "totalrequest" => $blog->count(),
-                    "blog" => $blog,
-                ],
-                200
-            );
+            return response()->json([
+                "totalrequest" => $blog->count(),
+                "blog" => $blog,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "No Data Found.",
-                ],
-                404
-            );
+            return response()->json([
+                "message" => "No Data Found.",
+            ],404);
         }
     }
 
     //Super-admin Approved Blog's Pending Request
-    public function blogApproval(Blog $blog)
-    {
+    public function blogApproval(Blog $blog){
         try {
             // $blog = Blog::findOrFail($blog->id);
             if($blog->status == 1){
@@ -153,71 +124,54 @@ class SuperadminController extends Controller
                 $blog->update(["status" => 1]);
             }
 
-            return response()->json(
-                [
-                    "message" => "Approved.",
-                ],
-                200
-            );
+            return response()->json([
+                "message" => "Approved.",
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "Something Went Wrong!",
-                ],
-                500
-            );
+            return response()->json([
+                "message" => "Something Went Wrong!",
+            ],500);
         }
     }
 
     //Get All User's Request Who Wants To Become Publisher
-    public function publisherRequestList()
-    {
+    public function publisherRequestList(){
         try {
             $publisherRequest = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
             
-            return response()->json(
-                [
-                    "totalrequest" => $publisherRequest->count(),
-                    "publisherRequest" => $publisherRequest,
-                ],
-                200
-            );
+            return response()->json([
+                "totalrequest" => $publisherRequest->count(),
+                "publisherRequest" => $publisherRequest,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "No Request Found!",
-                ],
-                404
-            );
+            return response()->json([
+                "message" => "No Request Found!",
+            ],404);
         }
     }
 
     //Super-admin Approved User's Pending Request
-    public function publisherApproval(User $user)
-    {
+    public function publisherApproval(User $user){
         try{
-        $request = PublisherRequest::where('user_id',$user->id)->first();
-        if($request->req_approval == 1){
-            return response()->json([
-                "message"=>"Already Approved!",
-            ],500);
-        }
-        else{
-            $user->update(['role' => 1]);
+            $request = PublisherRequest::where('user_id',$user->id)->first();
+            if($request->req_approval == 1){
+                return response()->json([
+                    "message"=>"Already Approved!",
+                ],500);
+            }
+            else{
+                $user->update(['role' => 1]);
 
-            //Send Mail to User That his Request has been Accepted 
-            Mail::to($user->email)->send(new RequestAcceptedMail($user));
-            $request->update(['req_approval'=>1]);
-        }
-        
-        return response()->json(
-            [
+                //Send Mail to User That his Request has been Accepted 
+                Mail::to($user->email)->send(new RequestAcceptedMail($user));
+                $request->update(['req_approval'=>1]);
+            }
+
+            return response()->json([
                 "message" => "Approved.",
-            ],
-            200
-        );
+            ],200);
         }catch(\Exception $e){
             report($e);
             return response()->json([
@@ -227,52 +181,37 @@ class SuperadminController extends Controller
     }
 
     //Delete Perticular User by Super-admin
-    public function userDelete(User $user)
-    {
+    public function userDelete(User $user){
         try {
             $user = $user->delete();
-            return response()->json(
-                [
-                    "message" => "User Deleted Successfully.",
-                ],
-                200
-            );
+            return response()->json([
+                "message" => "User Deleted Successfully.",
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "Something Went Wrong!",
-                ],
-                500
-            );
+            return response()->json([
+                "message" => "Something Went Wrong!",
+            ],500);
         }
     }
 
     //Delete Perticular Blog by Super-admin
-    public function blogDelete(Blog $blog)
-    {
+    public function blogDelete(Blog $blog){
         try {
             $blog = $blog->delete();
-            return response()->json(
-                [
-                    "message" => "Blog Deleted Successfully.",
-                ],
-                200
-            );
+            return response()->json([
+                "message" => "Blog Deleted Successfully.",
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "Something went Wrong!",
-                ],
-                500
-            );
+            return response()->json([
+                "message" => "Something went Wrong!",
+            ],500);
         }
     }
 
     //Edit User by Super-admin
-    public function editUser(Request $request, User $user)
-    {
+    public function editUser(Request $request, User $user){
         $request->validate([
             "name" => "required",
             "role" => "required",
@@ -285,27 +224,20 @@ class SuperadminController extends Controller
             $user->status = $request->status;
             $user->save();
 
-            return response()->json(
-                [
-                    "message" => "User Updated Successfully.",
-                    "user" => $user,
-                ],
-                200
-            );
+            return response()->json([
+                "message" => "User Updated Successfully.",
+                "user" => $user,
+            ],200);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "Something went Wrong!",
-                ],
-                500
-            );
+            return response()->json([
+                "message" => "Something went Wrong!",
+            ],500);
         }
     }
     
     //Edit Blog by Super-admin
-    public function editBlog(Request $request, Blog $blog)
-    {   
+    public function editBlog(Request $request, Blog $blog){   
         $request->validate([
             "title" => "required|string",
             "content" => "required",
@@ -323,21 +255,15 @@ class SuperadminController extends Controller
             $blog->status = $request->status;
             $blog->save();
 
-            return response()->json(
-                [
-                    "message" => "Blog Updated Successfully.",
-                    "blog" => $blog,
-                ],
-                200
-            );
+            return response()->json([
+                "message" => "Blog Updated Successfully.",
+                "blog" => $blog,
+            ],200);
         }catch (\Exception $e) {
             report($e);
-            return response()->json(
-                [
-                    "message" => "Something Went Wrong!",
-                ],
-                500
-            );
+            return response()->json([
+                "message" => "Something Went Wrong!",
+            ],500);
         }
     }
 

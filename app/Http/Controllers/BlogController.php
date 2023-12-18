@@ -49,7 +49,6 @@ class BlogController extends Controller
     public function blog(Request $request){
         try{
             $title =$request->input('title');
-            
             if($title){
                 $blog = Blog::where('title','LIKE',"%$title%")
                 ->where('status',1)
@@ -78,16 +77,12 @@ class BlogController extends Controller
             $likes = $blog->likes;
             $reply = $totalcomments->whereNotNull('parent_id'); 
 
-
             return response()->json([
                 'message'=>'Blog Details',
-                'blog'=>$blog,
-                'totalcomments'=>$comments->count(),
-                'comments'=>$comments,
-                'totalreply'=>$reply->count(),
-                'reply'=>$reply,
-                'totallikes'=>$likes->count(),
-                'likes'=>$likes,
+                 'totalcomments'=>$comments->count(),
+                 'totalreply'=>$reply->count(),
+                 'totallikes'=>$likes->count(),
+                 'blog'=>$blog,
             ],200);
         }catch(\Exception $e){
             report($e);
