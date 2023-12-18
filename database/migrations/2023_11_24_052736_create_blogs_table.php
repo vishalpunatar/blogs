@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('title');
+            $table->string('title')->unique();;
             $table->string('content');
             $table->string('image');
             $table->boolean('status')->default(0);

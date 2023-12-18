@@ -17,7 +17,6 @@ class PublisherRequest extends Model
         'email',
         'description',
         'req_approval',
-        'token',
     ];
 
     public function user(){

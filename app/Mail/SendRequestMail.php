@@ -13,15 +13,13 @@ class SendRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
     public $publisher;
-    public $token; 
     
     /**
      * Create a new message instance.
      */
-    public function __construct($publisher,$token)
+    public function __construct($publisher)
     {
         $this->publisher = $publisher;
-        $this->token = $token;
     }
 
     /**

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Models\Blog;
 use App\Models\User;
 use App\Models\Comment;
@@ -15,20 +17,20 @@ class BlogController extends Controller
     //Create Blog By Publisher
     public function createBlog(Request $request){
         $request->validate([
-            'title' => 'required|string|unique',
+            'title' => 'required|string|unique:blogs,title',
             'content' => 'required',
             'image' => 'required|image',
         ]);
         
         try{
-            $img = time().".".$request->image->extension();
-            $request->image->storeAs('/public/image',$img);
+            $image = Str::random(12).".".$request->image->extension();
+            $request->image->storeAs('/public/image',$image);
             
             $blog = Blog::create([
                 'user_id' => Auth()->id(),
                 'title' => $request->title,
                 'content' => $request->content,
-                'image' => $img,    
+                'image' => $image,    
             ]);
             
             return response()->json([
@@ -99,26 +101,26 @@ class BlogController extends Controller
     public function editBlog(Request $request, Blog $blog) {
         
         $request->validate([
-            'title'=>'required',
+            'title'=>'required|string',
             'content'=>'required',
             'image'=>'required|image',
         ]);
 
-        try{    
+        try{
             $user = auth()->user();
-            $blog = $user->blogs()->find($blog->id);
+            $blog = $user->blogs()->findOrFail($blog->id);
             if(!$blog) {
                 return response()->json([
                     "message"=>"You don't have authorization to Edit this Blog!",
                 ],401);
             }
 
-            $img = time().".".$request->image->extension();
-            $request->image->storeAs('/public/image',$img);
+            $image = Str::random(12).".".$request->image->extension();
+            $request->image->storeAs('/public/image',$image);
 
             $blog->title = $request->title;
             $blog->content = $request->content;
-            $blog->image = $img;
+            $blog->image = $image;
             $blog->save();
             
             return response()->json([
@@ -179,8 +181,6 @@ class BlogController extends Controller
         $request->validate([
             'comment' => 'required',
         ]);
-
-        //$comment = Comment::where('id',$comment->id)->first();
 
         $reply = $comment->create([
             'user_id' => auth()->id(),

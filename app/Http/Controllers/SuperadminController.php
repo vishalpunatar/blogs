@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Blog;
 use App\Models\PublisherRequest;
@@ -142,12 +143,13 @@ class SuperadminController extends Controller
     public function blogApproval(Blog $blog)
     {
         try {
-            $blog = Blog::findOrFail($blog->id);
+            // $blog = Blog::findOrFail($blog->id);
             if($blog->status == 1){
                 return response()->json([
                     "message"=>"Already Approved!",
                 ],500);
-            }else{
+            }
+            else{
                 $blog->update(["status" => 1]);
             }
 
@@ -177,7 +179,7 @@ class SuperadminController extends Controller
             return response()->json(
                 [
                     "totalrequest" => $publisherRequest->count(),
-                    "req" => $publisherRequest,
+                    "publisherRequest" => $publisherRequest,
                 ],
                 200
             );
@@ -185,7 +187,7 @@ class SuperadminController extends Controller
             report($e);
             return response()->json(
                 [
-                    "message" => "No Request Found.",
+                    "message" => "No Request Found!",
                 ],
                 404
             );
@@ -193,31 +195,21 @@ class SuperadminController extends Controller
     }
 
     //Super-admin Approved User's Pending Request
-    public function publisherApproval(Request $request)
+    public function publisherApproval(User $user)
     {
-        $request->validate([
-            'token'=>'required',
-        ]);
-
         try{
-        $token = PublisherRequest::where('token',$request->token)->first();
-        if($token->req_approval == 1){
+        $request = PublisherRequest::where('user_id',$user->id)->first();
+        if($request->req_approval == 1){
             return response()->json([
                 "message"=>"Already Approved!",
             ],500);
         }
-        
-        if(!$token){
-            return response()->json([
-                'message'=>'Something Went Wrong!',
-            ],500);
-        }else{
-            $user = $token->user->where('id',$token->user_id)->first();
+        else{
             $user->update(['role' => 1]);
 
             //Send Mail to User That his Request has been Accepted 
             Mail::to($user->email)->send(new RequestAcceptedMail($user));
-            $token->update(['req_approval'=>1]);
+            $request->update(['req_approval'=>1]);
         }
         
         return response()->json(
@@ -238,7 +230,7 @@ class SuperadminController extends Controller
     public function userDelete(User $user)
     {
         try {
-            $userdel = User::find($user->id)->delete();
+            $user = $user->delete();
             return response()->json(
                 [
                     "message" => "User Deleted Successfully.",
@@ -260,7 +252,7 @@ class SuperadminController extends Controller
     public function blogDelete(Blog $blog)
     {
         try {
-            $blogdelete = Blog::find($blog->id)->delete();
+            $blog = $blog->delete();
             return response()->json(
                 [
                     "message" => "Blog Deleted Successfully.",
@@ -288,18 +280,10 @@ class SuperadminController extends Controller
         ]);
 
         try {
-            $user->update([
-                'name'=>$request->name,
-                'role'=>$request->role,
-                'status'=>$request->status,
-            ]);
-            
-            // $user->name = $request->name;
-            // $user->email = $user->email;
-            // $user->password = bcrypt($user->password);
-            // $user->role = $request->role;
-            // $user->status = $request->status;
-            // $user->save();
+            $user->name = $request->name;
+            $user->role = $request->role;
+            $user->status = $request->status;
+            $user->save();
 
             return response()->json(
                 [
@@ -318,50 +302,24 @@ class SuperadminController extends Controller
             );
         }
     }
-
-    //fetch blog for edit
-    // public function fetchBlogForEdit(Blog $blog){
-    //     try {
-    //         $user = auth()->user();
-    //         if($user->role == 1){
-    //             $blog = Blog::where(['user_id'=>$user->id,'id'=>$blog->id])->get();
-    //             if(!$blog){
-    //                 return  response()->json(["message"=>"not found"]);
-    //             }
-    //             else{
-    //                 return $blog;
-    //             }
-    //         }
-    //         elseif($user->role == 2){
-    //             $blog = Blog::findOrFail($blog->id);
-    //             return $blog;
-    //         }
-    //     } catch (\Exception $e) {    
-    //         report($e);
-    //         return response()->json([
-    //             'message'=>'Something Went Wrong!',
-    //         ],500);
-    //     }
-    // }
     
     //Edit Blog by Super-admin
     public function editBlog(Request $request, Blog $blog)
     {   
-        //$blog = $this->fetchBlogForEdit($blog);
         $request->validate([
-            "title" => "required|unique|string",
+            "title" => "required|string",
             "content" => "required",
-            "image" => "required|image",
+            "image" => "required|image|unique:blogs,image",
             "status" => "required",
         ]);
 
         try {
-            $img = time() . "." . $request->image->extension();
-            $request->image->storeAs("/public/image", $img);
+            $image = Str::random(12). "." . $request->image->extension();
+            $request->image->storeAs("/public/image", $image);
 
             $blog->title = $request->title;
             $blog->content = $request->content;
-            $blog->image = $img;
+            $blog->image = $image;
             $blog->status = $request->status;
             $blog->save();
 
@@ -372,7 +330,7 @@ class SuperadminController extends Controller
                 ],
                 200
             );
-        } catch (\Exception $e) {
+        }catch (\Exception $e) {
             report($e);
             return response()->json(
                 [

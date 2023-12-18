@@ -5,4 +5,4 @@
 <p>Email: <b>{{$publisher->email}}</b></p>
 <p>Description: {{$publisher->description}}</p>
 <p>To approve the request click on Accept Button</p>
-<button><a href={{ url('/publisher/approval/user_id/'.$publisher->user_id.'/token/'.$token) }}>Accept</a></button> 
+<button><a href={{ url('/publisher/approval/user_id/'.$publisher->user_id) }}>Accept</a></button> 

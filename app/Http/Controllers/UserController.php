@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Blog;
 use App\Models\PublisherRequest;
@@ -24,10 +23,6 @@ class UserController extends Controller
         
         try {
             $user = auth()->user()->update(['name'=>$request->name]);
-            //$user->name = $request->name;
-            // $user->email = $user->email;
-            // $user->password = $user->password;
-            // $user->save();
 
             return response()->json([
                 "message"=>"Data Updated Successfully.",
@@ -50,7 +45,6 @@ class UserController extends Controller
         try{
             $user = auth()->user();
             $admin = User::where('role',2)->first();
-            $token = Str::random(32);
 
             if($user->publisherRequest) {
                 return response()->json([
@@ -62,11 +56,10 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'description' => $request->description,
-                'token' => $token,
             ]);
 
             //Send Mail to admin's email that User Request to wants to be a Publisher 
-            Mail::to($admin->email)->send(new SendRequestMail($publisher,$token));
+            Mail::to($admin->email)->send(new SendRequestMail($publisher));
             
             return response()->json([
                 'message'=>'Request Sended.',

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email');
             $table->string('description');
             $table->boolean('req_approval')->default(0);
-            $table->string('token');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

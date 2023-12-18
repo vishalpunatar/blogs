@@ -71,7 +71,7 @@ class AuthController extends Controller
         }catch(\Exception $e){
             report($e);
             return response()->json([
-                'message'=>'Data Not Found.'
+                'message'=>'Data Not Found!'
             ],404);
         }
     }
@@ -166,11 +166,6 @@ class AuthController extends Controller
             ]);
         
             $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->first();
-            if(!$token){
-                return response()->json([
-                    'message'=>'Invalid Token or Email!',
-                ],404);
-            }
             $email = User::where('email',$token->email)->first();
             if(!$email){
                 return response()->json([
@@ -196,7 +191,6 @@ class AuthController extends Controller
     //To Logout 
     public function logout(){
         try{
-            
             auth()->user()->token()->revoke();
             return response()->json([
                 'message'=>'Logged Out Successfully.',
