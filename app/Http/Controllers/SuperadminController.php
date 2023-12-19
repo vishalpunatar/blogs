@@ -91,7 +91,7 @@ class SuperadminController extends Controller
         } catch (\Exception $e) {
             report($e);
             return response()->json([
-                "message" => "No Data Found.",
+                "message" => "No Data Found!",
             ],404);
         }
     }
@@ -107,7 +107,7 @@ class SuperadminController extends Controller
         } catch (\Exception $e) {
             report($e);
             return response()->json([
-                "message" => "No Data Found.",
+                "message" => "No Data Found!",
             ],404);
         }
     }
@@ -147,7 +147,7 @@ class SuperadminController extends Controller
         } catch (\Exception $e) {
             report($e);
             return response()->json([
-                "message" => "No Request Found!",
+                "message" => "Record Not Found!",
             ],404);
         }
     }
@@ -246,7 +246,7 @@ class SuperadminController extends Controller
         $request->validate([
             "title" => "required|string",
             "content" => "required",
-            "image" => "required|image|unique:blogs,image",
+            "image" => "required|image",
             "status" => "required",
         ]);
 

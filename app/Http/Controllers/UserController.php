@@ -48,7 +48,7 @@ class UserController extends Controller
 
             if($user->publisherRequest) {
                 return response()->json([
-                    "message" => "Already Applied."
+                    "message" => "Already Applied!"
                 ],500);
             }
 

@@ -63,7 +63,7 @@ class BlogController extends Controller
         }catch (\Exception $e){
             report($e);
             return response()->json([
-                'message'=>"Not Found."
+                'message'=>"Not Found!"
             ],404);
         }
     }
@@ -77,7 +77,7 @@ class BlogController extends Controller
             $reply = $totalcomments->whereNotNull('parent_id'); 
 
             return response()->json([
-                'message'=>'Blog Details',
+                'message'=>'Blog Details.',
                  'totalcomments'=>$comments->count(),
                  'totalreply'=>$reply->count(),
                  'totallikes'=>$likes->count(),
@@ -86,7 +86,7 @@ class BlogController extends Controller
         }catch(\Exception $e){
             report($e);
             return response()->json([
-                'message'=>'No Data Found',
+                'message'=>'No Data Found!',
             ],404);
         }
     }
@@ -102,7 +102,7 @@ class BlogController extends Controller
 
         try{
             $user = auth()->user();
-            $blog = $user->blogs()->findOrFail($blog->id);
+            $blog = $user->blogs()->find($blog->id);
             if(!$blog) {
                 return response()->json([
                     "message"=>"You don't have authorization to Edit this Blog!",
@@ -133,7 +133,15 @@ class BlogController extends Controller
     public function blogDelete(Blog $blog){
         try{
             $user = auth()->user();
-            $blog = $user->blogs()->findOrFail($blog->id)->delete();
+            $blog = $user->blogs()->find($blog->id);
+            if(!$blog) {
+                return response()->json([
+                    "message"=>"You don't have authorization to Delete this Blog!",
+                ],401);
+            }
+            else{
+                $blog->delete();
+            }
 
             return response()->json([
                 'message'=>'Blog Deleted Successfully.',
@@ -201,7 +209,7 @@ class BlogController extends Controller
         try{
             if($blog->likes->where('user_id',auth()->id())->first()){    
                 return response()->json([
-                    'message'=>'Already Liked.',
+                    'message'=>'Already Liked!',
                 ],500);    
             }
             else{
