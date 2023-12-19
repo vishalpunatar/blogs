@@ -238,7 +238,7 @@ class BlogController extends Controller
             $totalcomments->flatMap->replies;
 
             //it  return's Only Comments of Perticular Blog
-            $comments = $totalcomments->whereNull('parent_id');
+             $comments = $totalcomments->whereNull('parent_id');
 
             return response()->json([
                 'totalcomment'=>$totalcomments->count(),
@@ -255,7 +255,7 @@ class BlogController extends Controller
     //Super-admin and Publisher Can View Blog Replies
     public function showReply(Blog $blog){
         try {
-            $reply = $blog->comments->whereNotNull('parent_id');
+            $reply = $blog->comments()->whereNotNull('parent_id')->get();
                 
             return response()->json([
                 'totalreply'=>$reply->count(),
