@@ -104,7 +104,7 @@ class AuthController extends Controller
                 ],401);
             }
             else{
-                $updatedUser = $user->update(['password' => bcrypt($request->password)]);
+                $updateUser = $user->update(['password' => bcrypt($request->password)]);
                 return response()->json([
                     "message"=>"Password Changed Successfully.",
                 ],200);
@@ -120,7 +120,7 @@ class AuthController extends Controller
     //To Forget Password through Email 
     public function forgetPassword(Request $request){
         $request->validate([
-            'email'=>'required|email|exists:users,email',
+            'email'=>'required|email',
         ]);
 
         try {
@@ -133,7 +133,7 @@ class AuthController extends Controller
                 ],404);
             }
             else{
-                $data = ResetPassword::create([
+                 $data = ResetPassword::create([
                     'email' => $request->email,
                     'token' => $token,
                     'created_at' => Carbon::now(),
@@ -159,18 +159,19 @@ class AuthController extends Controller
         try {
             $request->validate([
                 'token' => 'required',
-                'email' => 'required|email|exists:users,email',
+                'email' => 'required|email',
                 'password' => 'required|min:8|confirmed',
             ]);
         
             $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->first();
-            $email = User::where('email',$token->email)->first();
-            if(!$email){
+            $user = User::where('email',$token->email)->first();
+            if(!$token){
                 return response()->json([
-                  'message'=>'Email Not Found!',  
+                    'message'=>'Email Not Found!',  
                 ],404);
-            }else{
-                User::where('email',$request->email)->update(['password'=>bcrypt($request->password)]);
+            }
+            else{
+                $user->update(['password'=>bcrypt($request->password)]);
             }
     
             $token->where('email',$token->email)->delete();

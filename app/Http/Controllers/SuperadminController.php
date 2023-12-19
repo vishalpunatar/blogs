@@ -36,7 +36,7 @@ class SuperadminController extends Controller
         } catch (\Exception $e) {
             report($e);
             return response()->json([
-                "message" => "No Data Found.",
+                "message" => "No User Found!",
             ],404);
         }
     }
@@ -60,7 +60,7 @@ class SuperadminController extends Controller
         } catch (\Exception $e) {
             report($e);
             return response()->json([
-                "message" => "No Data Found.",
+                "message" => "No Data Found!",
             ],404);
         }
     }
@@ -69,15 +69,15 @@ class SuperadminController extends Controller
     public function publisherList(Request $request){
         try {
             $name = $request->input('name');
-            $email = $request->input('name');
+            $email = $request->input('email');
             if($name){
                 $publisher = User::where('name','LIKE',"%$name%")
-                ->where("role",1)
+                ->where('role',1)
                 ->paginate(10);
             }
             elseif($email){
                 $publisher = User::where('email','LIKE',"$email")
-                ->where("role",1)
+                ->where('role',1)
                 ->paginate(10);
             }
             else{
@@ -156,7 +156,12 @@ class SuperadminController extends Controller
     public function publisherApproval(User $user){
         try{
             $request = PublisherRequest::where('user_id',$user->id)->first();
-            if($request->req_approval == 1){
+            if (!$request){
+                return response()->json([
+                    "message"=>"Record Not Found!",
+                ],404);
+            }
+            elseif($request->req_approval == 1){
                 return response()->json([
                     "message"=>"Already Approved!",
                 ],500);
@@ -183,7 +188,7 @@ class SuperadminController extends Controller
     //Delete Perticular User by Super-admin
     public function userDelete(User $user){
         try {
-            $user = $user->delete();
+            $user->delete();
             return response()->json([
                 "message" => "User Deleted Successfully.",
             ],200);
@@ -198,7 +203,7 @@ class SuperadminController extends Controller
     //Delete Perticular Blog by Super-admin
     public function blogDelete(Blog $blog){
         try {
-            $blog = $blog->delete();
+            $blog->delete();
             return response()->json([
                 "message" => "Blog Deleted Successfully.",
             ],200);
