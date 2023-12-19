@@ -32,62 +32,60 @@ use App\Http\Middleware\UserManage;
 Route::post('/signup', [AuthController::class, 'store']);
 Route::post('/login',[AuthController::class,'login']);
 Route::get('/blog',[BlogController::class,'blog']);
-Route::get('/blogdetail/{blog}',[BlogController::class,'blogData']);
-Route::post('/forgetpassword',[AuthController::class,'forgetPassword']);
+Route::get('/blog-detail/{blog}',[BlogController::class,'blogData']);
+Route::post('/forget-password',[AuthController::class,'forgetPassword']);
 Route::post('/reset-password/{token}',[AuthController::class,'resetPassword']);
 
 //super-admin Routes
 Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admin')->group(function () {    
     Route::get('/show',[AuthController::class,'profileshow']);
-    Route::get('/userlist/{name?}/{email?}',[SuperadminController::class,'userList']);
-    Route::get('/bloglist/{title?}',[SuperadminController::class,'blogList']);
-    Route::get('/publisherlist/{name?}/{email?}',[SuperadminController::class,'publisherList']);
-    Route::get('/blog/request',[SuperadminController::class,'blogRequestList']);
-    Route::post('/blog/approval/{blog}',[SuperadminController::class,'blogApproval']);
-    Route::get('/publisher/request',[SuperadminController::class,'publisherRequestList']);
-    Route::post('/publisher/approval/user_id/{user}',[SuperadminController::class,'publisherApproval']);
-    Route::post('/edituser/{user}',[SuperadminController::class,'editUser']);
-    Route::post('/editblog/{blog}',[SuperadminController::class,'editBlog']);
-    Route::delete('/userdelete/{user}',[SuperadminController::class,'userDelete']);
-    Route::delete('/blogdelete/{blog}',[SuperadminController::class,'blogDelete']);
-    Route::post('/addlike/{blog}',[BlogController::class,'addLike']);
-    Route::post('/addcomment/{blog}',[BlogController::class,'addComment']);
-    Route::post('/addreply/{comment}',[BlogController::class,'addReply']);
-    Route::get('/showcomment/{blog}',[BlogController::class,'showComment']);
-    Route::get('/showlike/{blog}',[BlogController::class,'showLike']);
-    Route::get('/showreply/{blog}',[BlogController::class,'showReply']);
-    Route::post('/change/password',[AuthController::class,'changePassword']);
-    Route::post('/manage/user/{user}',[SuperadminController::class,'manageUser']);
+    Route::get('/user-list/{name?}/{email?}',[SuperadminController::class,'userList']);
+    Route::get('/blog-list/{title?}',[SuperadminController::class,'blogList']);
+    Route::get('/publisher-list/{name?}/{email?}',[SuperadminController::class,'publisherList']);
+    Route::get('/blog-request',[SuperadminController::class,'blogRequestList']);
+    Route::post('/blog-approval/{blog}',[SuperadminController::class,'blogApproval']);
+    Route::get('/publisher-request',[SuperadminController::class,'publisherRequestList']);
+    Route::post('/publisher-approval/user_id/{user}',[SuperadminController::class,'publisherApproval']);
+    Route::post('/edit-user/{user}',[SuperadminController::class,'editUser']);
+    Route::post('/edit-blog/{blog}',[SuperadminController::class,'editBlog']);
+    Route::delete('/user-delete/{user}',[SuperadminController::class,'userDelete']);
+    Route::delete('/blog-delete/{blog}',[SuperadminController::class,'blogDelete']);
+    Route::post('/like/{blog}',[BlogController::class,'addLike']);
+    Route::post('/comment/{blog}',[BlogController::class,'addComment']);
+    Route::post('/reply/{comment}',[BlogController::class,'addReply']);
+    Route::get('/show-comment/{blog}',[BlogController::class,'showComment']);
+    Route::get('/show-like/{blog}',[BlogController::class,'showLike']);
+    Route::get('/show-reply/{blog}',[BlogController::class,'showReply']);
+    Route::post('/change-password',[AuthController::class,'changePassword']);
+    Route::post('/manage-user/{user}',[SuperadminController::class,'manageUser']);
     Route::get('/logout',[AuthController::class,'logout']);
-    //Route::get('/fetchblog/{blog}',[SuperadminController::class,'fetchBlogForEdit']);
 });
 
 //publisher Routes
 Route::middleware(['auth:api','IsPublisher','UserManage'])->prefix('/publisher')->group(function () {
     Route::get('/show',[AuthController::class,'profileshow']);
-    Route::post('/createblog',[BlogController::class,'createBlog']);
-    Route::post('/editblog/{blog}',[BlogController::class,'editBlog']);
+    Route::post('/create-blog',[BlogController::class,'createBlog']);
+    Route::post('/edit-blog/{blog}',[BlogController::class,'editBlog']);
     Route::get('/myblog/{title?}',[PublisherController::class,'myBlog']);
-    Route::delete('/blogdelete/{blog}',[BlogController::class,'blogDelete']);
-    Route::post('/addlike/{blog}',[BlogController::class,'addLike']);
-    Route::post('/addcomment/{blog}',[BlogController::class,'addComment']);
-    Route::post('/addreply/{comment}',[BlogController::class,'addReply']);
-    Route::get('/showcomment/{blog}',[BlogController::class,'showComment']);
-    Route::get('/showlike/{blog}',[BlogController::class,'showLike']);
-    Route::get('/showreply/{blog}',[BlogController::class,'showReply']);
-    Route::post('/change/password',[AuthController::class,'changePassword']);
+    Route::delete('/blog-delete/{blog}',[BlogController::class,'blogDelete']);
+    Route::post('/like/{blog}',[BlogController::class,'addLike']);
+    Route::post('/comment/{blog}',[BlogController::class,'addComment']);
+    Route::post('/reply/{comment}',[BlogController::class,'addReply']);
+    Route::get('/show-comment/{blog}',[BlogController::class,'showComment']);
+    Route::get('/show-like/{blog}',[BlogController::class,'showLike']);
+    Route::get('/show-reply/{blog}',[BlogController::class,'showReply']);
+    Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::get('/logout',[AuthController::class,'logout']);
-    //Route::get('/fetchblog/{blog}',[SuperadminController::class,'fetchBlogForEdit']);
 });
 
 //user Routes
 Route::middleware(['auth:api','IsUser','UserManage'])->prefix('/user')->group(function () {
     Route::get('/show',[AuthController::class,'profileshow']);
     Route::post('/edit',[UserController::class,'edit']);
-    Route::post('/publisher/request',[UserController::class,'publisherRequest']);
-    Route::post('/addcomment/{blog}',[BlogController::class,'addComment']);
-    Route::post('/addreply/{comment}',[BlogController::class,'addReply']);
-    Route::post('/addlike/{blog}',[BlogController::class,'addLike']);
-    Route::post('/change/password',[AuthController::class,'changePassword']);
+    Route::post('/publisher-request',[UserController::class,'publisherRequest']);
+    Route::post('/comment/{blog}',[BlogController::class,'addComment']);
+    Route::post('/reply/{comment}',[BlogController::class,'addReply']);
+    Route::post('/like/{blog}',[BlogController::class,'addLike']);
+    Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::get('/logout',[AuthController::class,'logout']);
 });
