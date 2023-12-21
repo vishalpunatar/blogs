@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+//use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use App\Models\User;
 use App\Models\Blog;
 use App\Models\PublisherRequest;

@@ -16,14 +16,11 @@ class SuperadminController extends Controller
     //Get All User's Data
     public function userList(Request $request){
         try {
-            $name =$request->input('name');
-            $email = $request->input('email');
-
-            if($name){
-                $user = User::where('name','LIKE',"%$name%")->paginate(10);
-            }
-            elseif($email){
-                $user = User::where('email','LIKE',"%$email%")->paginate(10);
+            $search = $request->query('search');
+            if($search){
+                $user = User::where('name','LIKE',"%$search%")
+                ->orWhere('email','LIKE',"%$search%")
+                ->paginate(10);
             }
             else{
                 $user = User::latest()->paginate(10);
