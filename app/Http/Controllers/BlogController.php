@@ -45,25 +45,26 @@ class BlogController extends Controller
     }
 
     //Get The Latest Blog Which are Approved By Super-admin
-    public function blog(Request $request){
+    public function blogs(Request $request){
         try{
-            $title =$request->input('title');
-            if($title){
-                $blog = Blog::where('title','LIKE',"%$title%")
-                ->where('status',1)
-                ->paginate(10);
+            $search =$request->query('search');
+            if($search){
+                $blogs = Blog::where([
+                    ['title','LIKE',"%$search%"],
+                    ['status',1],
+                ])->paginate(10);
             }
             else{
-                $blog = Blog::where('status',1)->latest()->paginate(10);
+                $blogs = Blog::where('status',1)->latest()->paginate(10);
             }
             
             return response()->json([
-                'blog'=>$blog
+                'blogs'=>$blogs
             ],200);
         }catch (\Exception $e){
             report($e);
             return response()->json([
-                'message'=>"Not Found!"
+                'message'=>"Data Not Found!"
             ],404);
         }
     }
@@ -71,17 +72,13 @@ class BlogController extends Controller
     //Get Perticular Blog-Data
     public function blogData(Blog $blog){
         try{
-            $totalcomments = $blog->comments;
-            $comments = $totalcomments->whereNull('parent_id');
-            $likes = $blog->likes;
-            $reply = $totalcomments->whereNotNull('parent_id'); 
+            $comments = Blog::with('comments.replies')->find($blog->id);
+            $likes = $blog->likes; 
 
             return response()->json([
                 'message'=>'Blog Details.',
-                 'totalcomments'=>$comments->count(),
-                 'totalreply'=>$reply->count(),
-                 'totallikes'=>$likes->count(),
-                 'blog'=>$blog,
+                'comments'=>$comments,
+                'likes'=>$likes,
             ],200);
         }catch(\Exception $e){
             report($e);
@@ -234,14 +231,10 @@ class BlogController extends Controller
     public function showComment(Blog $blog){
         try{
             //it return's Comments including Comment Replies of Perticular Blog 
-            $totalcomments = $blog->comments;  
-            $totalcomments->flatMap->replies;
-
-            //it  return's Only Comments of Perticular Blog
-             $comments = $totalcomments->whereNull('parent_id');
+            $comments = $blog->comments;  
+            $comments->flatMap->replies;
 
             return response()->json([
-                'totalcomment'=>$totalcomments->count(),
                 'comments'=>$comments,
             ],200);
         }catch(\Exception $e){
@@ -252,31 +245,13 @@ class BlogController extends Controller
         }
     }
 
-    //Super-admin and Publisher Can View Blog Replies
-    public function showReply(Blog $blog){
-        try {
-            $reply = $blog->comments()->whereNotNull('parent_id')->get();
-                
-            return response()->json([
-                'totalreply'=>$reply->count(),
-                'reply'=>$reply,
-            ],200);   
-        } catch (\Exception $e) {
-            report($e);
-            return response()->json([
-                'message'=>'Something Went Wrong!',
-            ],500);
-        }  
-    }
-
     //Super-admin and Publisher Can View Blog Like's
     public function showLike(Blog $blog){
         try{
-            $like = $blog->likes;
+            $likes = $blog->likes;
             
             return response()->json([
-                'totallikes'=>$like->count(),
-                'like'=>$like,
+                'likes'=>$likes,
             ],200);
         }catch(\Exception $e){
             report($e);

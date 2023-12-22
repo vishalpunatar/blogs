@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Blog;
+use App\Models\Comment;
+use App\Models\Like;
 use App\Models\PublisherRequest;
 use App\Mail\RequestAcceptedMail;
 use Exception;
@@ -18,17 +20,16 @@ class SuperadminController extends Controller
         try {
             $search = $request->query('search');
             if($search){
-                $user = User::where('name','LIKE',"%$search%")
+                $users = User::where('name','LIKE',"%$search%")
                 ->orWhere('email','LIKE',"%$search%")
                 ->paginate(10);
             }
             else{
-                $user = User::latest()->paginate(10);
+                $users = User::latest()->paginate(10);
             }
             
             return response()->json([
-                "totaluser" => $user->count(),
-                "user" => $user,
+                "users" => $users,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -41,18 +42,11 @@ class SuperadminController extends Controller
     //Get All Blog's Data
     public function blogList(Request $request){
         try {
-            $title =$request->input('title');
-
-            if($title){
-                $blog = Blog::where('title','LIKE',"%$title%")->paginate(10);
-            }
-            else{
-                $blog = Blog::latest()->paginate(10);    
-            }
+            $search =$request->query('search');
+            $blogs = $search?Blog::where('title','LIKE',"%$search%")->paginate(10):Blog::latest()->paginate(10);
             
             return response()->json([
-                "totalblog" => $blog->count(),
-                "blog" => $blog,
+                "blogs" => $blogs,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -65,25 +59,19 @@ class SuperadminController extends Controller
     //Get All Publisher's Data
     public function publisherList(Request $request){
         try {
-            $name = $request->input('name');
-            $email = $request->input('email');
-            if($name){
-                $publisher = User::where('name','LIKE',"%$name%")
-                ->where('role',1)
-                ->paginate(10);
-            }
-            elseif($email){
-                $publisher = User::where('email','LIKE',"$email")
+            $search = $request->query('search');
+            if($search){
+                $publishers = User::where('name','LIKE',"%$search%")
+                ->orWhere('email','LIKE',"%$search%")
                 ->where('role',1)
                 ->paginate(10);
             }
             else{
-                $publisher = User::where("role", 1)->paginate(10);
+                $publishers = User::where("role", 1)->paginate(10);
             }
 
             return response()->json([
-                "totalpublisher" => $publisher->count(),
-                "publisher" => $publisher,
+                "publishers" => $publishers,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -96,10 +84,9 @@ class SuperadminController extends Controller
     //Get All Blog's Request
     public function blogRequestList(){
         try {
-            $blog = Blog::where("status", 0)->latest()->paginate(10);
+            $blogs = Blog::where("status", 0)->latest()->paginate(10);
             return response()->json([
-                "totalrequest" => $blog->count(),
-                "blog" => $blog,
+                "blogs" => $blogs,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -135,11 +122,10 @@ class SuperadminController extends Controller
     //Get All User's Request Who Wants To Become Publisher
     public function publisherRequestList(){
         try {
-            $publisherRequest = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
+            $publisherRequests = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
             
             return response()->json([
-                "totalrequest" => $publisherRequest->count(),
-                "publisherRequest" => $publisherRequest,
+                "publisherRequests" => $publisherRequests,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -152,13 +138,9 @@ class SuperadminController extends Controller
     //Super-admin Approved User's Pending Request
     public function publisherApproval(User $user){
         try{
-            $request = PublisherRequest::where('user_id',$user->id)->first();
-            if (!$request){
-                return response()->json([
-                    "message"=>"Record Not Found!",
-                ],404);
-            }
-            elseif($request->req_approval == 1){
+            $userRequest = PublisherRequest::where('user_id',$user->id)->first();
+            
+            if($userRequest->req_approval == 1){
                 return response()->json([
                     "message"=>"Already Approved!",
                 ],500);
@@ -168,7 +150,7 @@ class SuperadminController extends Controller
 
                 //Send Mail to User That his Request has been Accepted 
                 Mail::to($user->email)->send(new RequestAcceptedMail($user));
-                $request->update(['req_approval'=>1]);
+                $userRequest->update(['req_approval'=>1]);
             }
 
             return response()->json([
@@ -279,7 +261,7 @@ class SuperadminController extends Controller
         try {
             $user->update(['role'=>$request->role,'status'=>$request->status]);
             return response()->json([
-                'message'=>'User Updated.'
+                'message'=>'User Updated Successfully.'
             ],200); 
         } catch (Exception $e) {
             report($e);

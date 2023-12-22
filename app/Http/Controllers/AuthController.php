@@ -34,7 +34,6 @@ class AuthController extends Controller
             
             return response()->json([
                 'message'=>'Sign-up Successfully.',
-                'user' => $user,
                 'token' => $token,
             ],200);
         } catch(\Exception $e){
@@ -55,7 +54,7 @@ class AuthController extends Controller
         
         try{
             if(auth::attempt(['email' => $request->email, 'password' => $request->password])){
-                $token = auth()->user()->createToken('UserToken')->accessToken;
+                $token = auth()->user()->createToken('userToken')->accessToken;
                 return response()->json([
                     'message'=>'Login Successfull.',
                     'token'=>$token,
@@ -119,32 +118,25 @@ class AuthController extends Controller
     //To Forget Password through Email 
     public function forgetPassword(Request $request){
         $request->validate([
-            'email'=>'required|email',
+            'email'=>'required|email|exists:users,email',
         ]);
 
         try {
             $email = User::where('email',$request->email)->first();
             $token = Str::random(32);    
 
-            if(!$email){
-                return response()->json([
-                    'message'=>'Email Not Found!',
-                ],404);
-            }
-            else{
-                 $data = ResetPassword::create([
-                    'email' => $request->email,
-                    'token' => $token,
-                    'created_at' => Carbon::now(),
-                ]);
+            $data = ResetPassword::create([
+                'email' => $request->email,
+                'token' => $token,
+                'created_at' => Carbon::now(),
+            ]);
 
-                //Send mail on User's Requested Email if Email Exists 
-                Mail::to($request->email)->send(new ResetPasswordMail($token));
+            //Send mail on User's Requested Email if Email Exists 
+            Mail::to($request->email)->send(new ResetPasswordMail($token));
             
-                return response()->json([
-                    'message'=>'Mail Sended Successfully.',
-                ],200);  
-            }
+            return response()->json([
+                'message'=>'Mail Sended Successfully.',
+            ],200);  
         } catch (\Exception $e) {
              report($e);
              return response()->json([
@@ -158,21 +150,13 @@ class AuthController extends Controller
         try {
             $request->validate([
                 'token' => 'required',
-                'email' => 'required|email',
+                'email' => 'required|email|exists:users,email',
                 'password' => 'required|min:8|confirmed',
             ]);
         
             $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->first();
             $user = User::where('email',$token->email)->first();
-            if(!$token){
-                return response()->json([
-                    'message'=>'Email Not Found!',  
-                ],404);
-            }
-            else{
-                $user->update(['password'=>bcrypt($request->password)]);
-            }
-    
+            $user->update(['password'=>bcrypt($request->password)]);
             $token->where('email',$token->email)->delete();
             
             return response()->json([

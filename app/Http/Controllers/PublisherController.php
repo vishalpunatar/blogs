@@ -16,11 +16,11 @@ class PublisherController extends Controller
     public function myBlog(Request $request){
         try{
             $user = auth()->user();
-            $title =$request->input('title');
-            $blog = $title?$user->blogs()->where('title','LIKE',"$title")->paginate(10):$user->blogs()->paginate(10);
+            $search =$request->query('search');
+            $blogs = $search?$user->blogs()->where('title','LIKE',"$search")->paginate(10):$user->blogs()->paginate(10);
 
             return response()->json([
-                'blog'=>$blog,
+                'blogs'=>$blogs,
             ],200);
         }catch(\Exception $e){
             report($e);

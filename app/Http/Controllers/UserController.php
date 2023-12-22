@@ -4,13 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-//use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection;
 use App\Models\User;
-use App\Models\Blog;
 use App\Models\PublisherRequest;
-use App\Models\Comment;
-use App\Models\Like;
 use App\Mail\SendRequestMail;
 use Mail;
 use Exception;
@@ -28,7 +24,6 @@ class UserController extends Controller
 
             return response()->json([
                 "message"=>"Data Updated Successfully.",
-                "user"=>$user,
             ],200);
         } catch(\Exeception $e) {
             report($e);
