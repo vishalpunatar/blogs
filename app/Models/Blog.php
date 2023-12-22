@@ -27,10 +27,14 @@ class Blog extends Model
     }
 
     public function comments(){
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class)->whereNull('parent_id');
     }
 
     public function likes(){
         return $this->hasMany(Like::class);
+    }
+
+    public function replies(){
+        return $this->hasMany(Comment::class,'parent_id');
     }
 }
