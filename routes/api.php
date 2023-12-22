@@ -55,6 +55,7 @@ Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admi
     Route::post('/reply/{comment}',[BlogController::class,'addReply']);
     Route::get('/show-comment/{blog}',[BlogController::class,'showComment']);
     Route::get('/show-like/{blog}',[BlogController::class,'showLike']);
+    Route::delete('/comment-delete/{comment}',[BlogController::class,'deleteComment']);
     Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::post('/manage-user/{user}',[SuperadminController::class,'manageUser']);
     Route::get('/logout',[AuthController::class,'logout']);
