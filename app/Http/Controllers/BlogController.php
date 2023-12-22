@@ -48,16 +48,9 @@ class BlogController extends Controller
     public function blogs(Request $request){
         try{
             $search =$request->query('search');
-            if($search){
-                $blogs = Blog::where([
-                    ['title','LIKE',"%$search%"],
-                    ['status',1],
-                ])->paginate(10);
-            }
-            else{
-                $blogs = Blog::where('status',1)->latest()->paginate(10);
-            }
-            
+            $availableBlogs = Blog::where('status',1);
+
+            $blogs = $search?$availableBlogs->where('title','LIKE',"%$search%")->paginate(10):$availableBlogs->latest()->paginate(10);
             return response()->json([
                 'blogs'=>$blogs
             ],200);
@@ -72,13 +65,11 @@ class BlogController extends Controller
     //Get Perticular Blog-Data
     public function blogData(Blog $blog){
         try{
-            $comments = Blog::with('comments.replies')->find($blog->id);
-            $likes = $blog->likes; 
+            $blogDetails = $blog->load('comments.replies','likes'); 
 
             return response()->json([
                 'message'=>'Blog Details.',
-                'comments'=>$comments,
-                'likes'=>$likes,
+                'blogDetails'=>$blogDetails,
             ],200);
         }catch(\Exception $e){
             report($e);
