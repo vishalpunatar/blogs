@@ -60,12 +60,14 @@ class SuperadminController extends Controller
     public function publisherList(Request $request){
         try {
             $search = $request->query('search');
+            
             if($search){
-                $publishers = User::where('name','LIKE',"%$search%")
-                ->orWhere('email','LIKE',"%$search%")
-                ->where('role',1)
-                ->paginate(10);
-            }
+                $publishers = User::where('role',1)
+                ->where(function($query)use($search){
+                    $query->where('name','LIKE',"%$search%")
+                    ->orWhere('email','LIKE',"%$search%");
+                })->paginate(10);
+            }    
             else{
                 $publishers = User::where("role", 1)->paginate(10);
             }

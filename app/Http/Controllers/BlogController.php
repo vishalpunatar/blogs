@@ -260,4 +260,21 @@ class BlogController extends Controller
             ],404);
         }
     }
+
+    //To Delete the Particular Comment
+    public function deleteComment(Comment $comment){
+        try {
+            $comment->delete();
+            $comment->where('parent_id',$comment->id)->delete();
+            
+            return response()->json([
+                "message"=>"Comment Deleted Successfully.",
+            ],200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "message"=>"Something Went Wrong!",
+            ],500);
+        }
+    } 
 }
