@@ -20,7 +20,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed'
+            'password' => 'required|min:8|max:15|confirmed'
         ]);
 
         try{
@@ -79,7 +79,7 @@ class AuthController extends Controller
             return response()->json([
                 'user'=>$user,
             ],200);
-        } catch(Exeception $e) {
+        } catch(\Exeception $e) {
             report($e);
             return response()->json([
                 'message'=> 'Something went wrong!',
@@ -91,7 +91,7 @@ class AuthController extends Controller
     public function changePassword(Request $request){
         $request->validate([
             'oldpassword'=>'required',
-            'password'=>'required|min:8|confirmed',
+            'password'=>'required|min:8|max:15|confirmed',
         ]);
 
         try {
@@ -102,7 +102,7 @@ class AuthController extends Controller
                 ],401);
             }
             else{
-                $updateUser = $user->update(['password' => bcrypt($request->password)]);
+                $user->update(['password' => bcrypt($request->password)]);
                 return response()->json([
                     "message"=>"Password Changed Successfully.",
                 ],200);
@@ -122,7 +122,6 @@ class AuthController extends Controller
         ]);
 
         try {
-            $email = User::where('email',$request->email)->first();
             $token = Str::random(32);    
 
             $data = ResetPassword::create([
@@ -151,11 +150,11 @@ class AuthController extends Controller
             $request->validate([
                 'token' => 'required',
                 'email' => 'required|email|exists:users,email',
-                'password' => 'required|min:8|confirmed',
+                'password' => 'required|min:8|max:15|confirmed',
             ]);
         
-            $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->first();
-            $user = User::where('email',$token->email)->first();
+            $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->firstOrFail();
+            $user = User::where('email',$token->email)->firstOrFail();
             $user->update(['password'=>bcrypt($request->password)]);
             $token->where('email',$token->email)->delete();
             

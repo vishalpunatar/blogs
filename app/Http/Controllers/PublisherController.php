@@ -13,11 +13,11 @@ use Exception;
 class PublisherController extends Controller
 {
     //Publisher Can Get His Blog's
-    public function myBlog(Request $request){
+    public function myBlog(){
         try{
             $user = auth()->user();
-            $search =$request->query('search');
-            $blogs = $search?$user->blogs()->where('title','LIKE',"$search")->paginate(10):$user->blogs()->paginate(10);
+            $search = request()->query('search');
+            $blogs = $search?$user->blogs()->where('title','LIKE',"%$search%")->paginate(10):$user->blogs()->paginate(10);
 
             return response()->json([
                 'blogs'=>$blogs,

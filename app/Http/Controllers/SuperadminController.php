@@ -16,17 +16,15 @@ use Mail;
 class SuperadminController extends Controller
 {
     //Get All User's Data
-    public function userList(Request $request){
+    public function userList(){
         try {
-            $search = $request->query('search');
-            if($search){
-                $users = User::where('name','LIKE',"%$search%")
-                ->orWhere('email','LIKE',"%$search%")
-                ->paginate(10);
-            }
-            else{
-                $users = User::latest()->paginate(10);
-            }
+            $search = request()->query('search');
+
+            $users = User::when($search, function ($query) use ($search){
+                $query->where('name','LIKE',"%$search%")
+                ->orWhere('email','LIKE',"%$search%");
+            })->orderBy('created_at','desc')
+            ->paginate(10);
             
             return response()->json([
                 "users" => $users,
@@ -40,10 +38,14 @@ class SuperadminController extends Controller
     }
 
     //Get All Blog's Data
-    public function blogList(Request $request){
+    public function blogList(){
         try {
-            $search =$request->query('search');
-            $blogs = $search?Blog::where('title','LIKE',"%$search%")->paginate(10):Blog::latest()->paginate(10);
+            $search =request()->query('search');
+
+            $blogs = Blog::when($search, function ($query) use ($search){
+                $query->where('title','LIKE',"%$search%");
+            })->orderBy('created_at','desc')
+            ->paginate(10);
             
             return response()->json([
                 "blogs" => $blogs,
@@ -57,20 +59,16 @@ class SuperadminController extends Controller
     }
 
     //Get All Publisher's Data
-    public function publisherList(Request $request){
+    public function publisherList(){
         try {
-            $search = $request->query('search');
+            $search = request()->query('search');
             
-            if($search){
-                $publishers = User::where('role',1)
-                ->where(function($query)use($search){
-                    $query->where('name','LIKE',"%$search%")
-                    ->orWhere('email','LIKE',"%$search%");
-                })->paginate(10);
-            }    
-            else{
-                $publishers = User::where("role", 1)->paginate(10);
-            }
+            $publishers = User::where('role',1)
+            ->where(function ($query) use ($search){
+                $query->where('name','LIKE',"%$search%")
+                ->orWhere('email','LIKE',"%$search%");
+            })->orderBy('created_at','desc')
+            ->paginate(10);           
 
             return response()->json([
                 "publishers" => $publishers,

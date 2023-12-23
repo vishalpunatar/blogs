@@ -25,8 +25,7 @@ class BlogController extends Controller
             $image = Str::random(12).".".$request->image->extension();
             $request->image->storeAs('/public/image',$image);
             
-            $blog = Blog::create([
-                'user_id' => Auth()->id(),
+            $blog = auth()->user()->blogs()->create([
                 'title' => $request->title,
                 'content' => $request->content,
                 'image' => $image,    
@@ -45,19 +44,23 @@ class BlogController extends Controller
     }
 
     //Get The Latest Blog Which are Approved By Super-admin
-    public function blogs(Request $request){
+    public function blogs(){
         try{
-            $search =$request->query('search');
+            $search =request()->query('search');
             $availableBlogs = Blog::where('status',1);
 
-            $blogs = $search?$availableBlogs->where('title','LIKE',"%$search%")->paginate(10):$availableBlogs->latest()->paginate(10);
+            $blogs = $availableBlogs->when($search, function($query) use($search){
+                $query->where('title','LIKE',"%$search%");
+            })->orderBy('created_at','desc')
+            ->paginate(10);
+                        
             return response()->json([
-                'blogs'=>$blogs
+                'blogs'=>$blogs,
             ],200);
         }catch (\Exception $e){
             report($e);
             return response()->json([
-                'message'=>"Data Not Found!"
+                'message'=>"Data Not Found!",
             ],404);
         }
     }
@@ -65,17 +68,24 @@ class BlogController extends Controller
     //Get Perticular Blog-Data
     public function blogData(Blog $blog){
         try{
-            $blogDetails = $blog->load('comments.replies','likes'); 
+            $blog = $blog->load('comments.replies','likes'); 
 
-            return response()->json([
-                'message'=>'Blog Details.',
-                'blogDetails'=>$blogDetails,
-            ],200);
+            if($blog->status == 1){
+                return response()->json([
+                    "message"=>"Blog Details.",
+                    "blog"=>$blog,
+                ],200);
+            }
+            else{
+                return response()->json([
+                    "message"=>"No Data Found!",
+                ],404);
+            }
         }catch(\Exception $e){
             report($e);
             return response()->json([
-                'message'=>'No Data Found!',
-            ],404);
+                "message"=>"Something Went Wrong!",
+            ],500);
         }
     }
 
@@ -90,8 +100,7 @@ class BlogController extends Controller
 
         try{
             $user = auth()->user();
-            $blog = $user->blogs()->find($blog->id);
-            if(!$blog) {
+            if(!$user->blogs->contains($blog)) {
                 return response()->json([
                     "message"=>"You don't have authorization to Edit this Blog!",
                 ],401);
@@ -121,8 +130,7 @@ class BlogController extends Controller
     public function blogDelete(Blog $blog){
         try{
             $user = auth()->user();
-            $blog = $user->blogs()->find($blog->id);
-            if(!$blog) {
+            if(!$user->blogs->contains($blog)) {
                 return response()->json([
                     "message"=>"You don't have authorization to Delete this Blog!",
                 ],401);
@@ -149,11 +157,11 @@ class BlogController extends Controller
         ]);
 
         try{
-            $comment = $blog->comments()->create([
-                'user_id' => auth()->id(),
+            $comment = auth()->user()->comments()->create([
+                'blog_id' => $blog->id,
                 'comment' => $request->comment,
             ]);
-            
+
             return response()->json([
                 'message'=>'Comment Added.',
                 'comment'=>$comment,
@@ -173,8 +181,7 @@ class BlogController extends Controller
         ]);
         
         try {
-            $reply = $comment->create([
-                'user_id' => auth()->id(),
+            $reply = auth()->user()->comments()->create([
                 'blog_id' => $comment->blog_id,
                 'parent_id' => $comment->id,
                 'comment' => $request->comment,
@@ -201,8 +208,8 @@ class BlogController extends Controller
                 ],500);    
             }
             else{
-                $like = $blog->likes()->create([
-                    'user_id' => auth()->id(),
+                $like = auth()->user()->like()->create([
+                    'blog_id' => $blog->id,
                     'like' => 1,
                 ]);    
             }
@@ -227,6 +234,7 @@ class BlogController extends Controller
 
             return response()->json([
                 'comments'=>$comments,
+                
             ],200);
         }catch(\Exception $e){
             report($e);
