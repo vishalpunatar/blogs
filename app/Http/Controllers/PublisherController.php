@@ -17,7 +17,11 @@ class PublisherController extends Controller
         try{
             $user = auth()->user();
             $search = request()->query('search');
-            $blogs = $search?$user->blogs()->where('title','LIKE',"%$search%")->paginate(10):$user->blogs()->paginate(10);
+
+            $blogs = $user->blogs()->when($search, function ($query) use ($search){
+                $query->where('title','LIKE',"%$search%");
+            })->orderBy('created_at','desc')
+            ->paginate(10);
 
             return response()->json([
                 'blogs'=>$blogs,
