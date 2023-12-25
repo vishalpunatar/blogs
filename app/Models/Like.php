@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Blog;
+use App\Traits\DateTimeTrait;
+
 
 class Like extends Model
 {
-    use HasFactory;
+    use HasFactory, DateTimeTrait;
 
     protected $table = 'likes';
     protected $fillable = [

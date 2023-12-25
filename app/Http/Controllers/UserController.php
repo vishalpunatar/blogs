@@ -10,9 +10,12 @@ use App\Models\PublisherRequest;
 use App\Mail\SendRequestMail;
 use Mail;
 use Exception;
+use App\Traits\DateTimeTrait;
 
 class UserController extends Controller
 {
+    use DateTimeTrait;
+    
     //User Can Edit Their Profile
     public function edit(Request $request) {
         $request->validate([

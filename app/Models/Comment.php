@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Blog;
+use App\Traits\DateTimeTrait;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory, DateTimeTrait;
     protected $fillable = [
         'user_id',
         'blog_id',

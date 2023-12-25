@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\Like;
+use App\Traits\DateTimeTrait;
+
 
 class Blog extends Model
 {
-    use HasFactory;
+    use HasFactory, DatetimeTrait;
 
     public $table = 'blogs';
 

@@ -11,10 +11,12 @@ use App\Models\Blog;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\PublisherRequest;
+use App\Traits\DateTimeTrait;
+
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, DateTimeTrait;
 
     protected $fillable = [
         'name',
@@ -32,6 +34,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        //'created_at' => 'datetime:Y-m-d D h:i:sA',
+        //'updated_at' => 'datetime:Y-m-d D h:i:sA',
     ];
 
     public function blogs(){
