@@ -10,6 +10,7 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Models\PublisherRequest;
 use App\Mail\RequestAcceptedMail;
+use App\Helpers\Helper;
 use Exception;
 use Mail;
 
@@ -108,6 +109,7 @@ class SuperadminController extends Controller
                 $blog->update(["status" => 1]);
             }
 
+            Helper::createActivity("Blog", "Approve", "Approved Blog(title: $blog->title).");
             return response()->json([
                 "message" => "Approved.",
             ],200);
@@ -152,7 +154,8 @@ class SuperadminController extends Controller
                 Mail::to($user->email)->send(new RequestAcceptedMail($user));
                 $userRequest->update(['req_approval'=>1]);
             }
-
+            
+            Helper::createActivity("UserRequest", "Approve", "Approved User($user->email).");
             return response()->json([
                 "message" => "Approved.",
             ],200);
@@ -168,6 +171,8 @@ class SuperadminController extends Controller
     public function userDelete(User $user){
         try {
             $user->delete();
+
+            Helper::createActivity("User", "Delete", "Deleted User($user->email).");
             return response()->json([
                 "message" => "User Deleted Successfully.",
             ],200);
@@ -183,6 +188,8 @@ class SuperadminController extends Controller
     public function blogDelete(Blog $blog){
         try {
             $blog->delete();
+
+            Helper::createActivity("Blog", "Delete", "Deleted Blog(title: $blog->title).");
             return response()->json([
                 "message" => "Blog Deleted Successfully.",
             ],200);
@@ -208,6 +215,7 @@ class SuperadminController extends Controller
             $user->status = $request->status;
             $user->save();
 
+            Helper::createActivity("User", "Update", "Updated User ($user->email).");
             return response()->json([
                 "message" => "User Updated Successfully.",
                 "user" => $user,
@@ -239,6 +247,7 @@ class SuperadminController extends Controller
             $blog->status = $request->status;
             $blog->save();
 
+            Helper::createActivity("Blog", "Update", "Update Blog (title:$blog->title).");
             return response()->json([
                 "message" => "Blog Updated Successfully.",
                 "blog" => $blog,
@@ -260,6 +269,8 @@ class SuperadminController extends Controller
 
         try {
             $user->update(['role'=>$request->role,'status'=>$request->status]);
+
+            Helper::createActivity("User", "Update", "Updated User ($user->email).");
             return response()->json([
                 'message'=>'User Updated Successfully.'
             ],200); 

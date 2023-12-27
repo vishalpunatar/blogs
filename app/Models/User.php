@@ -53,4 +53,8 @@ class User extends Authenticatable
     public function publisherRequest(){
         return $this->hasOne(PublisherRequest::class);
     }
+
+    public function activities(){
+        return $this->hasMany(ActivityLog::class);
+    }
 }

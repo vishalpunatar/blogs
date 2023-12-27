@@ -7,12 +7,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\SuperadminAuthenticate;
 use App\Http\Middleware\PublisherAuthenticate;
 use App\Http\Middleware\UserAuthenticate;
 use App\Http\Middleware\UserManage;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +59,7 @@ Route::middleware(['auth:api','IsSuperadmin','UserManage'])->prefix('/super-admi
     Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::post('/manage-user/{user}',[SuperadminController::class,'manageUser']);
     Route::get('/logout',[AuthController::class,'logout']);
+    Route::get('/activity',[ActivityLogController::class,'allActivity']);
 });
 
 //publisher Routes
@@ -75,6 +76,7 @@ Route::middleware(['auth:api','IsPublisher','UserManage'])->prefix('/publisher')
     Route::get('/show-like/{blog}',[BlogController::class,'showLike']);
     Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::get('/logout',[AuthController::class,'logout']);
+    Route::get('/activity',[ActivityLogController::class,'showActivity']);
 });
 
 //user Routes
@@ -87,4 +89,5 @@ Route::middleware(['auth:api','IsUser','UserManage'])->prefix('/user')->group(fu
     Route::post('/like/{blog}',[BlogController::class,'addLike']);
     Route::post('/change-password',[AuthController::class,'changePassword']);
     Route::get('/logout',[AuthController::class,'logout']);
+    Route::get('/activity',[ActivityLogController::class,'showActivity']);
 });

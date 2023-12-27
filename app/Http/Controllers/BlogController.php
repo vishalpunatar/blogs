@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\PublisherRequest;
+use App\Models\ActivityLog;
+use App\Helpers\Helper;
 
 class BlogController extends Controller
 {
@@ -31,6 +33,8 @@ class BlogController extends Controller
                 'image' => $image,    
             ]);
             
+            //To Store activity using Helper Function
+            Helper::createActivity("Blog", "Create", "Blog(title: $blog->title) Created.");
             return response()->json([
                 'message'=>'Blog Added Successfully.',
                 'blog'=>$blog,
@@ -114,6 +118,7 @@ class BlogController extends Controller
             $blog->image = $image;
             $blog->save();
             
+            Helper::createActivity("Blog", "Update", "$user->email Updated Blog(title: $blog->title).");
             return response()->json([
                 'message'=>'Blog Updated Successfully.',
                 'blog'=>$blog,
@@ -139,6 +144,7 @@ class BlogController extends Controller
                 $blog->delete();
             }
 
+            Helper::createActivity("Blog", "Delete", "$user->email Deleted Blog($blog->title).");
             return response()->json([
                 'message'=>'Blog Deleted Successfully.',
             ],200);
@@ -157,11 +163,13 @@ class BlogController extends Controller
         ]);
 
         try{
-            $comment = auth()->user()->comments()->create([
+            $user = auth()->user();
+            $comment = $user->comments()->create([
                 'blog_id' => $blog->id,
                 'comment' => $request->comment,
             ]);
 
+            Helper::createActivity("Comment","Create","$user->email Comment($comment->comment) Added on Blog(title: $blog->title).");
             return response()->json([
                 'message'=>'Comment Added.',
                 'comment'=>$comment,
@@ -181,12 +189,14 @@ class BlogController extends Controller
         ]);
         
         try {
-            $reply = auth()->user()->comments()->create([
+            $user = auth()->user();
+            $reply = $user->comments()->create([
                 'blog_id' => $comment->blog_id,
                 'parent_id' => $comment->id,
                 'comment' => $request->comment,
             ]);
     
+            Helper::createActivity("Comment", "Add", "$user->email Reply Added to Comment($comment->comment) on Blog(id: $comment->blog_id).");
             return response()->json([
                 'message'=>'Reply Added.',
                 'reply'=>$reply,
@@ -202,18 +212,20 @@ class BlogController extends Controller
     //Add Like To Particular Blog   
     public function addLike(Blog $blog){
         try{
-            if($blog->likes->where('user_id',auth()->id())->first()){    
+            $user = auth()->user();
+            if($blog->likes->where('user_id',$user->id)->first()){    
                 return response()->json([
                     'message'=>'Already Liked!',
                 ],500);    
             }
             else{
-                $like = auth()->user()->like()->create([
+                $like = $user->like()->create([
                     'blog_id' => $blog->id,
                     'like' => 1,
                 ]);    
             }
            
+            Helper::createActivity("Like", "Add", "$user->email Like Added on Blog($blog->title).");
             return response()->json([
                 'message'=>'Like Added.',
             ],200);
@@ -266,6 +278,7 @@ class BlogController extends Controller
             $comment->delete();
             $comment->where('parent_id',$comment->id)->delete();
             
+            Helper::createActivity("Comment", "Delete", "Comment Deleted($comment->comment) of Blog(id: $comment->blog_id).");
             return response()->json([
                 "message"=>"Comment Deleted Successfully.",
             ],200);

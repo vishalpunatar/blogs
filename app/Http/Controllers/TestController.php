@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Blog;
 
-class AuthController extends Controller
+class TestController extends Controller
 {
 
     // public function index(){

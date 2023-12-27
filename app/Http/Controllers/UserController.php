@@ -11,6 +11,7 @@ use App\Mail\SendRequestMail;
 use Mail;
 use Exception;
 use App\Traits\DateTimeTrait;
+use App\Helpers\Helper;
 
 class UserController extends Controller
 {
@@ -23,8 +24,10 @@ class UserController extends Controller
         ]);
         
         try {
-            $user = auth()->user()->update(['name'=>$request->name]);
+            $user  = auth()->user();
+            $user->update(['name'=>$request->name]);
 
+            Helper::createActivity("User", "Update", "$user->email Updated Profile.");
             return response()->json([
                 "message"=>"Data Updated Successfully.",
             ],200);
@@ -61,6 +64,7 @@ class UserController extends Controller
             //Send Mail to admin's email that User Request to wants to be a Publisher 
             Mail::to($admin->email)->send(new SendRequestMail($publisher));
             
+            Helper::createActivity("User","Send-Request", "$user->email Send Request To Admin.");
             return response()->json([
                 'message'=>'Request Sended.',
             ],200);
