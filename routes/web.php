@@ -25,6 +25,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('users/{user}', function ($user) {
+    return $user;
+});
+
 // Route::get('/signup',function(){
 //     return view('signup');
 // });

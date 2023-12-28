@@ -209,7 +209,9 @@ class SuperadminController extends Controller
             "status" => "required",
         ]);
 
-        try {
+        // try {
+            return $user = $user->id;
+
             $user->name = $request->name;
             $user->role = $request->role;
             $user->status = $request->status;
@@ -220,12 +222,12 @@ class SuperadminController extends Controller
                 "message" => "User Updated Successfully.",
                 "user" => $user,
             ],200);
-        } catch (\Exception $e) {
-            report($e);
-            return response()->json([
-                "message" => "Something went Wrong!",
-            ],500);
-        }
+        // } catch (\Exception $e) {
+        //     report($e);
+        //     return response()->json([
+        //         "message" => "Something went Wrong!",
+        //     ],500);
+        // }
     }
     
     //Edit Blog by Super-admin
@@ -266,15 +268,15 @@ class SuperadminController extends Controller
             "role"=>"required",
             "status"=>"required",
         ]);
-
+        
         try {
             $user->update(['role'=>$request->role,'status'=>$request->status]);
 
-            Helper::createActivity("User", "Update", "Updated User ($user->email).");
+            Helper::createActivity("User", "Update", "Updated User($user->email).");
             return response()->json([
                 'message'=>'User Updated Successfully.'
             ],200); 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             report($e);
             return response()->json([
                 "message" => "Something Went Wrong!",

@@ -75,4 +75,23 @@ class UserController extends Controller
             ],500);
         }       
     }
+
+    //To Enable/Disable api-token for User 
+    public function apiToggle(){
+        $status = request()->query('status');
+        $user = auth()->user();
+        if($status == 1){
+            $token = Helper::generateUniqueToken();
+            $user->update(['api_token'=>$token]);
+            return response()->json([
+                "message" => "Api Token Enable",
+            ],200);
+        }
+        else{
+            $user->update(['api_token'=>null]);
+            return response()->json([
+                "message"=>"Api Token Disable",
+            ],200);
+        }
+    }
 }

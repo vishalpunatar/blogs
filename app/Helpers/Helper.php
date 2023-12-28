@@ -2,6 +2,8 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
@@ -45,6 +47,14 @@ class Helper
             'description' =>$description 
         ]);
     }
+
+    public static function generateUniqueToken($size = 32, $table = 'users', $column = 'api_token'){
+        $token = Str::random($size);
+        if($table && DB::table($table)->where($column,$token)->count()){
+            Helper::generateUniqueToken($size, $table, $column);
+        }
+        return $token;
+    } 
 }
 
 ?>

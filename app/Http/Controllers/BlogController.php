@@ -157,15 +157,15 @@ class BlogController extends Controller
     }
 
     //User Add Comment To Blog
-    public function addComment(Request $request, Blog $blog){
+    public function addComment($blog, Request $request){
         $request->validate([
             'comment'=>'required',
         ]);
-
+        
         try{
             $user = auth()->user();
-            $comment = $user->comments()->create([
-                'blog_id' => $blog->id,
+            $comment = $blog->comments()->create([
+                'user_id' => $user->id,
                 'comment' => $request->comment,
             ]);
 
@@ -183,7 +183,7 @@ class BlogController extends Controller
     }
 
     //Add Comment Reply
-    public function addReply(Request $request, Comment $comment){
+    public function addReply(Request $request, Blog $blog, Comment $comment){
         $request->validate([
             'comment' => 'required',
         ]);
@@ -191,12 +191,12 @@ class BlogController extends Controller
         try {
             $user = auth()->user();
             $reply = $user->comments()->create([
-                'blog_id' => $comment->blog_id,
+                'blog_id' => $blog->id,
                 'parent_id' => $comment->id,
                 'comment' => $request->comment,
             ]);
     
-            Helper::createActivity("Comment", "Add", "$user->email Reply Added to Comment($comment->comment) on Blog(id: $comment->blog_id).");
+            Helper::createActivity("Comment", "Add", "$user->email Reply Added to Comment($comment->comment) on Blog(title: $blog->title).");
             return response()->json([
                 'message'=>'Reply Added.',
                 'reply'=>$reply,
