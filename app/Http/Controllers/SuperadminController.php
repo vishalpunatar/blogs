@@ -254,7 +254,8 @@ class SuperadminController extends Controller
         ]);
 
         try {
-            $image = Str::random(12). "." . $request->image->extension();
+            $name = Helper::generateUniqueToken(12, "blogs", "image");
+            $image = $name.".".$request->image->extension();
             $request->image->storeAs("/public/image", $image);
 
             $blog->title = $request->title;

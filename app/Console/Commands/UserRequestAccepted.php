@@ -37,7 +37,7 @@ class UserRequestAccepted extends Command
                 }
             });
             
-            $this->info('The Request Accepted Successfully.');
+            $this->line('Requests Accepted Successfully.');
         } catch (\Exception $e) {
             $this->error('Something Went Wrong! Error: '.$e->getMessage());
         }
