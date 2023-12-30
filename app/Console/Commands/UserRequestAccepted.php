@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\PublisherRequest;
+use Illuminate\Support\Collection;
 
 class UserRequestAccepted extends Command
 {
@@ -26,11 +27,19 @@ class UserRequestAccepted extends Command
      */
     public function handle()
     {
-        $requests = PublisherRequest::all();
-        foreach ($requests as $requests) {
-            $requests->where('req_approval', 0)->update(['req_approval' => 1]);
-            $requests->user->where('id',$requests->user_id)->update(['role' => 1]);
+        try {
+            PublisherRequest::where('req_approval', 0)
+            ->select('req_approval','user_id')
+            ->chunk(10, function ($requests){
+                foreach ($requests as $request) {
+                    $request->where('req_approval',0)->update(['req_approval' => 1]);
+                    $request->user->update(['role' => 1]);
+                }
+            });
+            
+            $this->info('The Request Accepted Successfully.');
+        } catch (\Exception $e) {
+            $this->error('Something Went Wrong! Error: '.$e->getMessage());
         }
-        echo "Approved ";
     }
 }
