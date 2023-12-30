@@ -17,13 +17,13 @@ use Mail;
 class SuperadminController extends Controller
 {
     //Get All User's Data
-    public function userList(){
+    public function users(){
         try {
             $search = request()->query('search');
 
             $users = User::when($search, function ($query) use ($search){
-                $query->where('name','LIKE',"%$search%")
-                ->orWhere('email','LIKE',"%$search%");
+                $query->where('name', 'LIKE', "%$search%")
+                ->orWhere('email', 'LIKE', "%$search%");
             })->orderBy('created_at','desc')
             ->paginate(10);
             
@@ -37,9 +37,24 @@ class SuperadminController extends Controller
             ],404);
         }
     }
+    
+    //To get Particular User Detail.
+    public function userShow(User $user){
+        try {
+            return response()->json([
+                'message'=>'User Details',
+                'user'=>$user,
+            ],200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                'message'=>'Something Went Wrong!',
+            ],500);
+        }
+    }
 
     //Get All Blog's Data
-    public function blogList(){
+    public function blogs(){
         try {
             $search =request()->query('search');
 
@@ -60,7 +75,7 @@ class SuperadminController extends Controller
     }
 
     //Get All Publisher's Data
-    public function publisherList(){
+    public function publishers(){
         try {
             $search = request()->query('search');
             
@@ -83,9 +98,9 @@ class SuperadminController extends Controller
     }
 
     //Get All Blog's Request
-    public function blogRequestList(){
+    public function blogRequests(){
         try {
-            $blogs = Blog::where("status", 0)->latest()->paginate(10);
+            $blogs = Blog::where('status', 0)->latest()->paginate(10);
             return response()->json([
                 "blogs" => $blogs,
             ],200);
@@ -100,6 +115,7 @@ class SuperadminController extends Controller
     //Super-admin Approved Blog's Pending Request
     public function blogApproval(Blog $blog){
         try {
+            // return Blog::findOrFail($blog->id);
             if($blog->status == 1){
                 return response()->json([
                     "message"=>"Already Approved!",
@@ -109,7 +125,7 @@ class SuperadminController extends Controller
                 $blog->update(["status" => 1]);
             }
 
-            Helper::createActivity("Blog", "Approve", "Approved Blog(title: $blog->title).");
+            Helper::createActivity("Blog", "Blog-Approve", "Approved Blog(title: $blog->title).");
             return response()->json([
                 "message" => "Approved.",
             ],200);
@@ -122,7 +138,7 @@ class SuperadminController extends Controller
     }
 
     //Get All User's Request Who Wants To Become Publisher
-    public function publisherRequestList(){
+    public function userRequests(){
         try {
             $publisherRequests = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
             
@@ -138,7 +154,7 @@ class SuperadminController extends Controller
     }
 
     //Super-admin Approved User's Pending Request
-    public function publisherApproval(User $user){
+    public function userApproval(User $user){
         try{
             $userRequest = PublisherRequest::where('user_id',$user->id)->first();
             
@@ -155,7 +171,7 @@ class SuperadminController extends Controller
                 $userRequest->update(['req_approval'=>1]);
             }
             
-            Helper::createActivity("UserRequest", "Approve", "Approved User($user->email).");
+            Helper::createActivity("User", "Request-Approve", "Approved User($user->email).");
             return response()->json([
                 "message" => "Approved.",
             ],200);
@@ -209,25 +225,23 @@ class SuperadminController extends Controller
             "status" => "required",
         ]);
 
-        // try {
-            return $user = $user->id;
-
+        try {
             $user->name = $request->name;
             $user->role = $request->role;
             $user->status = $request->status;
             $user->save();
 
-            Helper::createActivity("User", "Update", "Updated User ($user->email).");
+            Helper::createActivity("User", "Update", "Updated User($user->email).");
             return response()->json([
                 "message" => "User Updated Successfully.",
                 "user" => $user,
             ],200);
-        // } catch (\Exception $e) {
-        //     report($e);
-        //     return response()->json([
-        //         "message" => "Something went Wrong!",
-        //     ],500);
-        // }
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "message" => "Something went Wrong!",
+            ],500);
+        }
     }
     
     //Edit Blog by Super-admin
@@ -283,5 +297,23 @@ class SuperadminController extends Controller
             ],500);
         }
     }
+
+
+    //To Delete the Particular Comment
+    public function deleteComment(Blog $blog, Comment $comment){
+        try {
+            $comment->delete();
+            $comment->where('parent_id',$comment->id)->delete();
+            Helper::createActivity("Comment", "Delete", "Comment Deleted($comment->comment) of Blog(title: $blog->title).");
+            return response()->json([
+                "message"=>"Comment Deleted Successfully.",
+            ],200);
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                "message"=>"Something Went Wrong!",
+            ],500);
+        }
+    } 
 }
 

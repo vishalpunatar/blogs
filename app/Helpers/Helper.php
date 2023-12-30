@@ -36,19 +36,7 @@ class Helper
         ]);
     }
 
-    public static function updateActivity($on, $action, $description){
-        $type = self::userType();
-        $time = Carbon::now();
-
-        $data = auth()->user()->activities()->create([
-            'type' => $type,
-            'on' => $on,
-            'action' => $action,
-            'description' =>$description 
-        ]);
-    }
-
-    public static function generateUniqueToken($size = 32, $table = 'users', $column = 'api_token'){
+    public static function generateUniqueToken($size, $table, $column){
         $token = Str::random($size);
         if($table && DB::table($table)->where($column,$token)->count()){
             Helper::generateUniqueToken($size, $table, $column);

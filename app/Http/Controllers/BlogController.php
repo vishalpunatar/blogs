@@ -16,7 +16,7 @@ use App\Helpers\Helper;
 class BlogController extends Controller
 {
     //Create Blog By Publisher
-    public function createBlog(Request $request){
+    public function store(Request $request){
         $request->validate([
             'title' => 'required|string|unique:blogs,title',
             'content' => 'required',
@@ -24,17 +24,19 @@ class BlogController extends Controller
         ]);
         
         try{
-            $image = Str::random(12).".".$request->image->extension();
+            $name = Helper::generateUniqueToken(12, "blogs", "image");
+            $image = $name.".".$request->image->extension();
             $request->image->storeAs('/public/image',$image);
             
-            $blog = auth()->user()->blogs()->create([
+            $user = auth()->user();
+            $blog = $user->blogs()->create([
                 'title' => $request->title,
                 'content' => $request->content,
                 'image' => $image,    
             ]);
             
             //To Store activity using Helper Function
-            Helper::createActivity("Blog", "Create", "Blog(title: $blog->title) Created.");
+            Helper::createActivity("Blog", "Create", "Publisher($user->email) has been Created Blog(title: $blog->title).");
             return response()->json([
                 'message'=>'Blog Added Successfully.',
                 'blog'=>$blog,
@@ -70,7 +72,7 @@ class BlogController extends Controller
     }
 
     //Get Perticular Blog-Data
-    public function blogData(Blog $blog){
+    public function show(Blog $blog){
         try{
             $blog = $blog->load('comments.replies','likes'); 
 
@@ -93,71 +95,8 @@ class BlogController extends Controller
         }
     }
 
-    //Edit Blog by Publisher 
-    public function editBlog(Request $request, Blog $blog) {
-        
-        $request->validate([
-            'title'=>'required|string',
-            'content'=>'required',
-            'image'=>'required|image',
-        ]);
-
-        try{
-            $user = auth()->user();
-            if(!$user->blogs->contains($blog)) {
-                return response()->json([
-                    "message"=>"You don't have authorization to Edit this Blog!",
-                ],401);
-            }
-
-            $image = Str::random(12).".".$request->image->extension();
-            $request->image->storeAs('/public/image',$image);
-
-            $blog->title = $request->title;
-            $blog->content = $request->content;
-            $blog->image = $image;
-            $blog->save();
-            
-            Helper::createActivity("Blog", "Update", "$user->email Updated Blog(title: $blog->title).");
-            return response()->json([
-                'message'=>'Blog Updated Successfully.',
-                'blog'=>$blog,
-            ],200);
-        }catch(\Exception $e){
-            report($e);
-            return response()->json([
-                'message'=>'Something went wrong!'
-            ],500);
-        }
-    }
-
-    //Delete Blog By Publisher
-    public function blogDelete(Blog $blog){
-        try{
-            $user = auth()->user();
-            if(!$user->blogs->contains($blog)) {
-                return response()->json([
-                    "message"=>"You don't have authorization to Delete this Blog!",
-                ],401);
-            }
-            else{
-                $blog->delete();
-            }
-
-            Helper::createActivity("Blog", "Delete", "$user->email Deleted Blog($blog->title).");
-            return response()->json([
-                'message'=>'Blog Deleted Successfully.',
-            ],200);
-        }catch(\Exception $e){
-            report($e);
-            return response()->json([
-                'message'=>'Something Went Wrong!',
-            ],500);
-        }
-    }
-
     //User Add Comment To Blog
-    public function addComment($blog, Request $request){
+    public function addComment(Blog $blog, Request $request){
         $request->validate([
             'comment'=>'required',
         ]);
@@ -225,7 +164,7 @@ class BlogController extends Controller
                 ]);    
             }
            
-            Helper::createActivity("Like", "Add", "$user->email Like Added on Blog($blog->title).");
+            Helper::createActivity("Like", "Add", "$user->email Like Added on Blog(title: $blog->title).");
             return response()->json([
                 'message'=>'Like Added.',
             ],200);
@@ -237,7 +176,7 @@ class BlogController extends Controller
         }
     }
 
-    //Super-admin and Publisher Can View Blog Comment's 
+    //User Can View Blog Comment's 
     public function showComment(Blog $blog){
         try{
             //it return's Comments including Comment Replies of Perticular Blog 
@@ -256,7 +195,7 @@ class BlogController extends Controller
         }
     }
 
-    //Super-admin and Publisher Can View Blog Like's
+    //User Can View Blog Like's
     public function showLike(Blog $blog){
         try{
             $likes = $blog->likes;
@@ -271,22 +210,4 @@ class BlogController extends Controller
             ],404);
         }
     }
-
-    //To Delete the Particular Comment
-    public function deleteComment(Comment $comment){
-        try {
-            $comment->delete();
-            $comment->where('parent_id',$comment->id)->delete();
-            
-            Helper::createActivity("Comment", "Delete", "Comment Deleted($comment->comment) of Blog(id: $comment->blog_id).");
-            return response()->json([
-                "message"=>"Comment Deleted Successfully.",
-            ],200);
-        } catch (\Exception $e) {
-            report($e);
-            return response()->json([
-                "message"=>"Something Went Wrong!",
-            ],500);
-        }
-    } 
 }

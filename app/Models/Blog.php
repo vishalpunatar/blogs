@@ -9,7 +9,6 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Traits\DateTimeTrait;
 
-
 class Blog extends Model
 {
     use HasFactory, DatetimeTrait;
@@ -25,7 +24,7 @@ class Blog extends Model
     ];
 
     public function user(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function comments(){

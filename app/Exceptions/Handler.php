@@ -51,7 +51,7 @@ class Handler extends ExceptionHandler
     }
 
     // Handling model not found exception
-    public function render($requestuest, Throwable $exception)
+    public function render($request, Throwable $exception)
     {
         if($exception instanceof ModelNotFoundException) {
             // Not found response   
@@ -60,6 +60,6 @@ class Handler extends ExceptionHandler
             ],404);
         }
 
-        return parent::render($requestuest, $exception);
+        return parent::render($request, $exception);
     }
 }

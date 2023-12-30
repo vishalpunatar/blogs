@@ -33,7 +33,6 @@ class AuthController extends Controller
             
             $token = $user->createToken('userToken')->accessToken;
             
-            Helper::createActivity("User", "Sign-up", "Sign-up new user($request->email).");
             return response()->json([
                 'message'=>'Sign-up Successfully.',
                 'token' => $token,
@@ -51,13 +50,13 @@ class AuthController extends Controller
 
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|min:8|max:15',
         ]);
         
         try{
             if(auth::attempt(['email' => $request->email, 'password' => $request->password])){
                 $token = auth()->user()->createToken('userToken')->accessToken;
-                Helper::createActivity("User", "Login", "User($request->email) Login.");
+                Helper::createActivity("User", "Login", "$request->email has been Login.");
                 return response()->json([
                     'message'=>'Login Successfull.',
                     'token'=>$token,
@@ -138,7 +137,6 @@ class AuthController extends Controller
             //Send mail on User's Requested Email if Email Exists 
             Mail::to($request->email)->send(new ResetPasswordMail($token));
             
-            Helper::createActivity("User", "Send-Request", "$request->email Send Request For Change Password.");
             return response()->json([
                 'message'=>'Mail Sended Successfully.',
             ],200);  
@@ -164,7 +162,6 @@ class AuthController extends Controller
             $user->update(['password'=>bcrypt($request->password)]);
             $token->where('email',$token->email)->delete();
             
-            Helper::createActivity("User", "Update", "$user->email Changed Password Through Reset-Password Link.");
             return response()->json([
                 'message'=>'Password Updated Successfully.',
             ],200);

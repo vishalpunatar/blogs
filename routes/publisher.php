@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\BlogController;
@@ -7,15 +8,15 @@ use App\Http\Controllers\UserController;
 
 Route::middleware(['IsPublisher','UserManage'])->prefix('publisher/')->group(function () {
 
-    // BlogController routes
-    Route::prefix('blogs/')->group(function () {
-        Route::post('/create', [BlogController::class, 'createBlog']);
-        Route::post('/{blog}/edit', [BlogController::class, 'editBlog']);
-        Route::delete('/{blog}/delete', [BlogController::class, 'blogDelete']);
+    // Publisher routes
+    Route::prefix('blogs')->group(function () {
+        Route::post('/', [BlogController::class, 'store']);
+        Route::get('/', [PublisherController::class, 'myBlog']);
+        Route::patch('/{blog}', [PublisherController::class, 'editBlog']);
+        Route::delete('/{blog}', [PublisherController::class, 'blogDelete']);
+        Route::delete('/{blog}/comments/{comment}',[PublisherController::class,'commentDelete']);
     });
 
     // Additional routes
-    Route::get('/myblogs', [PublisherController::class, 'myBlog']);
-    Route::get('/api-toggle', [UserController::class, 'apiToggle']);
-
+    Route::get('/api-toggle/{status}', [UserController::class, 'apiToggle']);
 });

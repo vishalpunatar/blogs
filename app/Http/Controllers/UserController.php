@@ -40,7 +40,7 @@ class UserController extends Controller
     }
 
     //User Send Request To Become Publisher
-    public function publisherRequest(Request $request){
+    public function sendRequest(Request $request){
         $request->validate([
             'description'=>'required',
         ]);
@@ -77,20 +77,27 @@ class UserController extends Controller
     }
 
     //To Enable/Disable api-token for User 
-    public function apiToggle(){
-        $status = request()->query('status');
-        $user = auth()->user();
-        if($status == 1){
-            $token = Helper::generateUniqueToken();
-            $user->update(['api_token'=>$token]);
+    public function apiToggle($status){
+        if(!in_array($status, ['enable', 'disable'])) {
             return response()->json([
-                "message" => "Api Token Enable",
+                "message"=>"Invalid Status!",
+            ],500);
+        }
+
+        $user = auth()->user();
+        if($status == "enable"){
+            $token = Helper::generateUniqueToken(32, "users", "api_token");
+            $user->update(['api_token'=>$token]);
+            Helper::createActivity("User", "Create", "user($user->email) Created Api Token.");
+            return response()->json([
+                "message" => "Api Token Enable.",
             ],200);
         }
         else{
             $user->update(['api_token'=>null]);
+            Helper::createActivity("User", "Delete", "user($user->email) Delete Api Token.");
             return response()->json([
-                "message"=>"Api Token Disable",
+                "message"=>"Api Token Disable.",
             ],200);
         }
     }

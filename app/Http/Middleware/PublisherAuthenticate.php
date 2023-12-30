@@ -13,11 +13,11 @@ class PublisherAuthenticate
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $requestuest, Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         if(auth()->user() && auth()->user()->role == 1){
-            return $next($requestuest);
+            return $next($request);
         }
-        return response()->json(['message'=>'You Are Not Elligible To Access This Resource']);
+        return response()->json(['message'=>'You Are Not Elligible To Access This Resource'],403);
     }
 }

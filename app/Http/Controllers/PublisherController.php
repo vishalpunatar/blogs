@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use App\Helpers\Helper;
 use App\Models\Blog;
 use App\Models\Comment;
 use App\Models\Like;
@@ -34,30 +36,90 @@ class PublisherController extends Controller
         }
     }
 
-    // //Get Perticular Own Blog-Data
-    // public function PubBlogData(Blog $blog){
-    //     try{
-    //         $user = auth()->user();
-    //         $blog = $user->blogs()->findOrFail($blog->id);
-            
-    //         $comments = $blog->comments()->get();
-    //         $totalcomments = count($comments);
-    //         $likes = $blog->likes()->get();
-    //         $totallikes = count($likes);
+     //Edit Blog by Publisher 
+     public function editBlog(Request $request, Blog $blog) {
+        $request->validate([
+            'title'=>'required|string',
+            'content'=>'required',
+            'image'=>'required|image',
+        ]);
 
-    //         return response()->json([
-    //             'message'=>'Blog Details',
-    //             'blog'=>$blog,
-    //             'totalcomments'=>$totalcomments,
-    //             'comments'=>$comments,
-    //             'totallikes'=>$totallikes,
-    //             'likes'=>$likes,
-    //         ],200);
-    //     }catch(\Exception $e){
-    //         report($e);
-    //         return response()->json([
-    //             'message'=>'No Data Found',
-    //         ],404);
-    //     }
-    // }
+        try{
+            $user = auth()->user();
+            if(!$user->blogs->find($blog)) {
+                return response()->json([
+                    "message"=>"You don't have authorization to Edit this Blog!",
+                ],401);
+            }
+
+            $image = Str::random(12).".".$request->image->extension();
+            $request->image->storeAs('/public/image',$image);
+
+            $blog->title = $request->title;
+            $blog->content = $request->content;
+            $blog->image = $image;
+            $blog->save();
+            
+            Helper::createActivity("Blog", "Update", "$user->email Updated Blog(title: $blog->title).");
+            return response()->json([
+                'message'=>'Blog Updated Successfully.',
+                'blog'=>$blog,
+            ],200);
+        }catch(\Exception $e){
+            report($e);
+            return response()->json([
+                'message'=>'Something went wrong!'
+            ],500);
+        }
+    }
+
+     //Delete Blog By Publisher
+     public function blogDelete(Blog $blog){
+        try{
+            $user = auth()->user();
+            if(!$user->blogs->find($blog)) {
+                return response()->json([
+                    "message"=>"You don't have authorization to Delete this Blog!",
+                ],401);
+            }
+            else{
+                $blog->delete();
+            }
+
+            Helper::createActivity("Blog", "Delete", "$user->email Deleted Blog($blog->title).");
+            return response()->json([
+                'message'=>'Blog Deleted Successfully.',
+            ],200);
+        }catch(\Exception $e){
+            report($e);
+            return response()->json([
+                'message'=>'Something Went Wrong!',
+            ],500);
+        }
+    }
+
+    //Publisher Delete Comments of their Own Blogs
+    public function commentDelete(Blog $blog, Comment $comment){
+        try {
+            $user = auth()->user();
+            if(!$user->blogs->find($blog)){
+                return response()->json([
+                    "message"=>"You don't have authorization to Delete Comments of this Blog!",
+                ],401); 
+            }
+            else{
+                $comment->delete();
+                $comment->where('parent_id',$comment->id)->delete();
+                Helper::createActivity("Comment", "Delete", "$user->email Deleted Comment($comment->comment).");
+                return response()->json([
+                    'message'=>'Comment Deleted Successfully',
+                ],200);
+            }
+        } catch (\Exception $e) {
+            report($e);
+            return response()->json([
+                'message'=>'Something Went Wrong!',
+            ],500);
+        }
+    }
 }

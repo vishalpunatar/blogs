@@ -1,14 +1,13 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 
 
-Route::middleware(['IsUser','UserManage'])->prefix('user/')->group(function () {
+Route::middleware(['IsUser','UserManage'])->prefix('user')->group(function () {
     
     // UserController routes
-    Route::post('/edit', [UserController::class, 'edit']);
-    Route::post('/publisher-request', [UserController::class, 'publisherRequest']);
-    Route::get('/api-toggle', [UserController::class, 'apiToggle']);
-});
-
-   
+    Route::patch('/', [UserController::class, 'edit']);
+    Route::post('/request', [UserController::class, 'sendRequest']);
+    Route::patch('/api-toggle/{status}', [UserController::class, 'apiToggle']);
+});   

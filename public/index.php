@@ -49,7 +49,7 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 $kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle(
-    $requestuest = Request::capture()
+    $request = Request::capture()
 )->send();
 
-$kernel->terminate($requestuest, $response);
+$kernel->terminate($request, $response);

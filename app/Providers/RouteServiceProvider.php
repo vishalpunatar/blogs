@@ -7,8 +7,8 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-// use App\Models\Blog;
-// use App\Models\User;
+use App\Models\Blog;
+use App\Models\User;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -24,44 +24,27 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
      */
-    public function boot(): void
+    public function boot()
     {
-        // Route::model('blog', Blog::class);
-        // Route::model('user', User::class);
 
-        RateLimiter::for('api', function (Request $requestuest) {
-            return Limit::perMinute(60)->by($requestuest->user()?->id ?: $requestuest->ip());
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Route::bind('blog', function ($value) {
-        //     return Blog::where('id', $value)->firstOrFail();
-        // });
-
-        // Route::bind('user', function ($value) {
-        //     return User::findOrFail($value);
-        // });
-        // $this->bindBlogModel();
-
         $this->routes(function () {
-            Route::middleware(['auth:api'])->group(function() {
-                require base_path('routes/admin.php');
-                require base_path('routes/publisher.php');
-                require base_path('routes/user.php');
-            });
-            
             Route::middleware('api')
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
                 ->prefix('web')
                 ->group(base_path('routes/web.php'));
+
+            Route::middleware(['api', 'auth:api'])->group(function() {
+                require base_path('routes/admin.php');
+                require base_path('routes/publisher.php');
+                require base_path('routes/user.php');
+            });
+            
         });
     }
-
-    // private function bindBlogModel()
-    // {
-    //     $this->bind('blog', function ($value) {
-    //         return Blog::where('id', $value)->first() ?? abort(404);
-    //     });
-    // }
 }

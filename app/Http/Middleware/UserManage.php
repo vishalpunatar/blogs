@@ -13,11 +13,11 @@ class UserManage
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $requestuest, Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         if(auth()->user() && auth()->user()->status == 1){
-            return $next($requestuest);
+            return $next($request);
         }
-        return response()->json(['message'=>'Sorry You Are Temporary Disable by Admin']);
+        return response()->json(['message'=>'Sorry You Are Temporary Disable by Admin'],403);
     }
 }
