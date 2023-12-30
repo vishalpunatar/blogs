@@ -211,3 +211,6 @@ class BlogController extends Controller
         }
     }
 }
+
+//$requests->update(['req_approval' => 1]);
+        //$requests->user->update(['role' => 1]);
