@@ -18,5 +18,5 @@ Route::middleware(['IsPublisher','UserManage'])->prefix('publisher/')->group(fun
     });
 
     // Additional routes
-    Route::get('/api-toggle/{status}', [UserController::class, 'apiToggle']);
+    Route::patch('/api-toggle/{status}', [UserController::class, 'apiToggle']);
 });

@@ -115,7 +115,6 @@ class SuperadminController extends Controller
     //Super-admin Approved Blog's Pending Request
     public function blogApproval(Blog $blog){
         try {
-            // return Blog::findOrFail($blog->id);
             if($blog->status == 1){
                 return response()->json([
                     "message"=>"Already Approved!",
@@ -140,10 +139,10 @@ class SuperadminController extends Controller
     //Get All User's Request Who Wants To Become Publisher
     public function userRequests(){
         try {
-            $publisherRequests = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
+            $userRequests = PublisherRequest::where("req_approval", 0)->latest()->paginate(10);
             
             return response()->json([
-                "publisherRequests" => $publisherRequests,
+                "userRequests" => $userRequests,
             ],200);
         } catch (\Exception $e) {
             report($e);
@@ -299,10 +298,14 @@ class SuperadminController extends Controller
         }
     }
 
-
     //To Delete the Particular Comment
     public function deleteComment(Blog $blog, Comment $comment){
         try {
+            if (!$blog->comments->find($comment)){
+                return response()->json([
+                    "message" => "Record Not Found!",
+                ],404);
+            }
             $comment->delete();
             $comment->where('parent_id',$comment->id)->delete();
             Helper::createActivity("Comment", "Delete", "Comment Deleted($comment->comment) of Blog(title: $blog->title).");

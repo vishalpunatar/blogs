@@ -15,6 +15,7 @@ class PublisherAuthenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // To check that user is authenticated and user role shoule be 1(Publisher)
         if(auth()->user() && auth()->user()->role == 1){
             return $next($request);
         }

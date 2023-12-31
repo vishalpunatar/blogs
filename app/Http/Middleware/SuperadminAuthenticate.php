@@ -15,6 +15,7 @@ class SuperadminAuthenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // To check that user is authenticated and user role shoule be 2(Super-admin)
         if(auth()->user() && auth()->user()->role == 2){
             return $next($request);
         }

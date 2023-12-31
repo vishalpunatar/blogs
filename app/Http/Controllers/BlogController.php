@@ -103,16 +103,23 @@ class BlogController extends Controller
         
         try{
             $user = auth()->user();
-            $comment = $blog->comments()->create([
-                'user_id' => $user->id,
-                'comment' => $request->comment,
-            ]);
+            if($blog->status != 1){
+                return  response()->json([
+                    'message'=>'Record Not Found!',
+                ],404);
+            }
+            else{
+                $comment = $blog->comments()->create([
+                    'user_id' => $user->id,
+                    'comment' => $request->comment,
+                ]);
 
-            Helper::createActivity("Comment","Create","$user->email Comment($comment->comment) Added on Blog(title: $blog->title).");
-            return response()->json([
-                'message'=>'Comment Added.',
-                'comment'=>$comment,
-            ],200);
+                Helper::createActivity("Comment","Create","$user->email Comment($comment->comment) Added on Blog(title: $blog->title).");
+                return response()->json([
+                    'message'=>'Comment Added.',
+                    'comment'=>$comment,
+                ],200);
+            }
         }catch(\Exception $e){
             report($e);
             return response()->json([
@@ -152,6 +159,11 @@ class BlogController extends Controller
     public function addLike(Blog $blog){
         try{
             $user = auth()->user();
+            if($blog->status != 1){
+                return  response()->json([
+                    'message'=>'Record Not Found!',
+                ],404);
+            }
             if($blog->likes->where('user_id',$user->id)->first()){    
                 return response()->json([
                     'message'=>'Already Liked!',
@@ -211,6 +223,3 @@ class BlogController extends Controller
         }
     }
 }
-
-//$requests->update(['req_approval' => 1]);
-        //$requests->user->update(['role' => 1]);

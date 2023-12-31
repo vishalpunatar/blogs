@@ -15,6 +15,7 @@ class UserManage
      */
     public function handle(Request $request, Closure $next): Response
     {
+        //To check that user is authenticated and user status shoule be 1(1 = Enable/ 0 = Disable)
         if(auth()->user() && auth()->user()->status == 1){
             return $next($request);
         }

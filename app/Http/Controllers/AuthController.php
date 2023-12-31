@@ -21,7 +21,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|max:15|confirmed'
+            'password' => 'required|min:8|max:15|confirmed',
         ]);
 
         try{
@@ -126,7 +126,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $token = Str::random(32);    
+            $token = Helper::generateUniqueToken(32,"password_reset_tokens","token");   
 
             $data = ResetPassword::create([
                 'email' => $request->email,

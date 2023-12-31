@@ -14,10 +14,10 @@ class ActivityLogController extends Controller
     public function showActivity(){
         try {
             $user = auth()->user();
-            $activity = $user->activities()->paginate(10);
+            $activities = $user->activities()->paginate(10);
 
             return response()->json([
-                'activity'=>$activity,
+                'activity'=>$activities,
             ],200);
         } catch (\Exception $e){
             report($e);
@@ -30,9 +30,9 @@ class ActivityLogController extends Controller
     //Super-admin Show All Users Activities
     public function allActivity(){
         try {
-            $activity = ActivityLog::paginate(10);
+            $activities = ActivityLog::orderBy('created_at','desc')->paginate(10);
             return response()->json([
-                "activity"=>$activity,
+                "activity"=>$activities,
             ],200);
         } catch (\Exception $e) {
             report($e);

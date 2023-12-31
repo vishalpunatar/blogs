@@ -7,17 +7,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use App\Models\User;
 use App\Models\PublisherRequest;
-use App\Mail\SendRequestMail;
-use Mail;
-use Exception;
-use App\Traits\DateTimeTrait;
 use App\Helpers\Helper;
+use App\Mail\SendRequestMail;
+use Exception;
+use Mail;
 
 class UserController extends Controller
-{
-    use DateTimeTrait;
-    
-    //User Can Edit Their Profile
+{    
+    //User Can Edit Their Profile Name
     public function edit(Request $request) {
         $request->validate([
             "name" => "required|string",
@@ -27,7 +24,7 @@ class UserController extends Controller
             $user  = auth()->user();
             $user->update(['name'=>$request->name]);
 
-            Helper::createActivity("User", "Update", "$user->email Updated Profile.");
+            Helper::createActivity("User", "Update", "$user->email Updated Profile Name.");
             return response()->json([
                 "message"=>"Data Updated Successfully.",
             ],200);
@@ -88,14 +85,14 @@ class UserController extends Controller
         if($status == "enable"){
             $token = Helper::generateUniqueToken(32, "users", "api_token");
             $user->update(['api_token'=>$token]);
-            Helper::createActivity("User", "Create", "user($user->email) Created Api Token.");
+            Helper::createActivity("User", "Create", "$user->email Created Api Token.");
             return response()->json([
                 "message" => "Api Token Enable.",
             ],200);
         }
         else{
             $user->update(['api_token'=>null]);
-            Helper::createActivity("User", "Delete", "user($user->email) Delete Api Token.");
+            Helper::createActivity("User", "Delete", "$user->email Delete Api Token.");
             return response()->json([
                 "message"=>"Api Token Disable.",
             ],200);

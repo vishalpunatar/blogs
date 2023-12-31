@@ -15,6 +15,7 @@ class UserAuthenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
+        //To check that user is authenticated and user role shoule be 0(User)
         if(auth()->user() && auth()->user()->role == 0){
             return $next($request);
         }

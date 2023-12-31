@@ -49,7 +49,7 @@ class PublisherController extends Controller
             if(!$user->blogs->find($blog)) {
                 return response()->json([
                     "message"=>"You don't have authorization to Edit this Blog!",
-                ],401);
+                ],403);
             }
 
             $name = Helper::generateUniqueToken(12, "blogs", "image");
@@ -81,7 +81,7 @@ class PublisherController extends Controller
             if(!$user->blogs->find($blog)) {
                 return response()->json([
                     "message"=>"You don't have authorization to Delete this Blog!",
-                ],401);
+                ],403);
             }
             else{
                 $blog->delete();
@@ -106,7 +106,7 @@ class PublisherController extends Controller
             if(!$user->blogs->find($blog)){
                 return response()->json([
                     "message"=>"You don't have authorization to Delete Comments of this Blog!",
-                ],401); 
+                ],403); 
             }
             else{
                 $comment->delete();
