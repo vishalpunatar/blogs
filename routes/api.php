@@ -51,4 +51,5 @@ Route::prefix('blogs/{blog}/')->middleware(['auth:api','UserManage'])->group(fun
         Route::post('/', [BlogController::class, 'addLike']);
         Route::get('/', [BlogController::class, 'showLike']);
     });
+    
 });
