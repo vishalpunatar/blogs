@@ -53,5 +53,3 @@ Route::prefix('blogs/{blog}/')->middleware(['auth:api','UserManage'])->group(fun
     });
 });       
 
-
-
