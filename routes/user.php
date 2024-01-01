@@ -10,5 +10,4 @@ Route::middleware(['IsUser','UserManage'])->prefix('user')->group(function () {
     Route::patch('/', [UserController::class, 'edit']);
     Route::post('/request', [UserController::class, 'sendRequest']);
     Route::patch('/api-toggle/{status}', [UserController::class, 'apiToggle']);
-    
 });   
