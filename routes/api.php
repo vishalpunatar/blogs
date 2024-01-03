@@ -39,7 +39,7 @@ Route::prefix('auth')->middleware(['auth:api','UserManage'])->group(function () 
 });
 
 // Common Routes Of BlogController 
-Route::prefix('blogs/{blog}/')->middleware(['auth:api','UserManage'])->group(function () {
+Route::prefix('blogs/{blog}/')->middleware(['auth:api'])->group(function () {
    
     Route::prefix('comments')->group(function () {
         Route::get('/', [BlogController::class, 'showComment']);

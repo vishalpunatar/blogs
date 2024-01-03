@@ -4,7 +4,7 @@ use App\Http\Controllers\UserController;
 use App\Models\User;
 
 
-Route::middleware(['IsUser','UserManage'])->prefix('user')->group(function () {
+Route::middleware(['IsUser'])->prefix('user')->group(function () {
     
     // UserController routes
     Route::patch('/', [UserController::class, 'edit']);

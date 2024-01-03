@@ -54,6 +54,12 @@ class AuthController extends Controller
         ]);
         
         try{
+            $user = User::where('email',$request->email)->firstOrFail();
+            if($user->status == 0){
+                return response()->json([
+                    'message'=>'You are Temporary Banned!',
+                ],403);
+            }
             if(auth::attempt(['email' => $request->email, 'password' => $request->password])){
                 $token = auth()->user()->createToken('userToken')->accessToken;
                 Helper::createActivity("User", "Login", "$request->email has been Login.");

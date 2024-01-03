@@ -98,29 +98,4 @@ class PublisherController extends Controller
             ],500);
         }
     }
-
-    //Publisher Delete Comments of their Own Blogs
-    public function commentDelete(Blog $blog, Comment $comment){
-        try {
-            $user = auth()->user();
-            if(!$user->blogs->find($blog)){
-                return response()->json([
-                    "message"=>"You don't have authorization to Delete Comments of this Blog!",
-                ],403); 
-            }
-            else{
-                $comment->delete();
-                $comment->where('parent_id',$comment->id)->delete();
-                Helper::createActivity("Comment", "Delete", "$user->email Deleted Comment($comment->comment).");
-                return response()->json([
-                    'message'=>'Comment Deleted Successfully',
-                ],200);
-            }
-        } catch (\Exception $e) {
-            report($e);
-            return response()->json([
-                'message'=>'Something Went Wrong!',
-            ],500);
-        }
-    }
 }

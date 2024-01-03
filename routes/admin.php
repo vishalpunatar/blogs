@@ -8,7 +8,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\UserController;
 
-Route::prefix('super-admin/')->middleware(['IsSuperadmin','UserManage'])->group(function () {
+Route::prefix('super-admin/')->middleware(['IsSuperadmin'])->group(function () {
     
     // Additional route
     Route::get('/users', [SuperadminController::class, 'users']);

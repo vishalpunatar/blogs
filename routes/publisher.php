@@ -6,7 +6,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\UserController;
 
 
-Route::middleware(['IsPublisher','UserManage'])->prefix('publisher/')->group(function () {
+Route::middleware(['IsPublisher'])->prefix('publisher/')->group(function () {
 
     // Publisher routes
     Route::prefix('blogs')->group(function () {
