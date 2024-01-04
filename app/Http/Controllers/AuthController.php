@@ -56,10 +56,16 @@ class AuthController extends Controller
         try{
             $user = User::where('email',$request->email)->firstOrFail();
             if($user->status == 0){
+                  // Revoke all tokens
+                foreach ($user->tokens as $token) {
+                    $token->revoke();
+                }            
+
                 return response()->json([
                     'message'=>'You are Temporary Banned!',
                 ],403);
             }
+
             if(auth::attempt(['email' => $request->email, 'password' => $request->password])){
                 $token = auth()->user()->createToken('userToken')->accessToken;
                 Helper::createActivity("User", "Login", "$request->email has been Login.");
@@ -75,8 +81,8 @@ class AuthController extends Controller
         }catch(\Exception $e){
             report($e);
             return response()->json([
-                'message'=>'Data Not Found!'
-            ],404);
+                'message'=>'Something Went Wrong!'
+            ],500);
         }
     }
 
