@@ -161,18 +161,33 @@ class AuthController extends Controller
     }
     
     //To Reset Password via Email
-    public function resetPassword(Request $request){
+    public function resetPassword(Request $request, $token){
         try {
             $request->validate([
-                'token' => 'required',
-                'email' => 'required|email|exists:users,email',
                 'password' => 'required|min:8|max:15|confirmed',
             ]);
         
-            $token = ResetPassword::where(['email'=>$request->email,'token'=>$request->token])->firstOrFail();
-            $user = User::where('email',$token->email)->firstOrFail();
+            // Find the reset password token from the database
+            $resetToken = ResetPassword::where('token',$token)->first();
+            if(!$resetToken){
+                return response()->json([
+                    'message'=>'Invalid Token!',
+                ],500);
+            }
+
+            // Find the user with the email associated with the token
+            $user = User::where('email',$resetToken->email)->first();
+            if(!$user){
+                return response()->json([
+                    'message'=>'Email Not Found!',
+                ],404);
+            }
+
+            // Update the user's password with the new one
             $user->update(['password'=>bcrypt($request->password)]);
-            $token->where('email',$token->email)->delete();
+
+            // Delete the used reset password token
+            $resetToken->where('token',$token)->delete();
             
             return response()->json([
                 'message'=>'Password Updated Successfully.',
